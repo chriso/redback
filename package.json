@@ -1,0 +1,25 @@
+{ "name"          : "redback",
+  "description"   : "A high level Redis library",
+  "version"       : "0.1.0",
+  "homepage"      : "https://github.com/chriso/redback",
+  "author"        : "Chris O'Hara <cohara87@gmail.com>",
+  "main"          : "index",
+  "bugs": {
+    "mail": "cohara87@gmail.com",
+    "web": "http://github.com/chriso/redback/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/chriso/redback.git"
+  },
+  "engines": { "node": ">= 0.4.0" },
+  "dependencies": {
+    "hiredis": ">= 0.1.9",
+    "redis": ">= 0.6.0"
+  },
+  "preferGlobal": true,
+  "licenses": [{
+    "type": "MIT",
+    "url": "http://github.com/chriso/redback/raw/master/LICENSE"
+  }]
+}
