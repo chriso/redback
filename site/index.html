@@ -1,177 +1,194 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Redback - Redis-backed persistence for Node.JS</title>
-<link rel="icon" type="image/png" href="favicon.png" />
-<link href='http://fonts.googleapis.com/css?family=Gruppo' rel='stylesheet' type='text/css' />
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
-<script type="text/javascript">
-(function(a){a.fn.noisy=function(b){return this.each(function(){var c=document.createElement("canvas"),h=c.getContext("2d");if(!h&&b.fallback!==undefined&&b.fallback!=="")a(this).css("background-image","url("+b.fallback+"),"+a(this).css("background-image"));else{b=a.extend({},a.fn.noisy.defaults,b);c.width=c.height=b.size;for(var d=h.createImageData(c.width,c.height),e=function(i,k){return Math.floor(Math.random()*(k-i)+i)},j=0;j<b.intensity*Math.pow(b.size,2);j++){var f=e(0,c.width),g=e(0,c.height);f=(f+g*d.width)*4;g=e(0,255);d.data[f]=g;d.data[f+1]=b.monochrome?g:e(0,255);d.data[f+2]=b.monochrome?g:e(0,255);d.data[f+3]=e(0,255*b.opacity)}h.putImageData(d,0,0);a(this).data("original-css")==undefined&&a(this).data("original-css",a(this).css("background-image"));a(this).css("background-image","url("+c.toDataURL("image/png")+"),"+a(this).data("original-css"))}})};a.fn.noisy.defaults={intensity:0.9,size:200,opacity:0.08,fallback:"",monochrome:false}})(jQuery);
 
-$(function () {
-    $('body').noisy({
-        'intensity' : 1,
-        'size' : 200,
-        'opacity' : 0.070,
-        'fallback' : '',
-        'monochrome' : false
-    }).css('background-color', '#FCFCFC');
-});
-</script>
-<style type="text/css">
-body {
-    background-color: #FCFCFC;
-    font-family: Droid Sans,Arial,Sans Serif;
-    font-size: 16px;
-    margin: 0;
-    border-top: 3px solid #E60B0B;
-    color: #444;
-}
-#fork {
-    top: 0;
-    right: 0;
-    position: fixed;
-    z-index: 999;
-    opacity: 0.8;
-}
-#tag {
-    float: right;
-    margin-top: 54px;
-}
-#fork:hover {
-    opacity: 0.7;
-}
-#container {
-    width: 700px;
-    margin: 0 auto;
-}
-#header {
-    height: 70px;
-    border-bottom: 2px dotted #bbb;
-    margin-bottom: 10px;
-}
-#header h1 {
-    font-family: 'Gruppo',Arial, Sans Serif;
-    font-size: 60px;
-    font-weight: bold;
-    letter-spacing: -1px;
-    text-shadow: 1px 2px 2px rgba(30,30,30,0.6);
-}
-#header h1 .red {
-    color: #E60B0B;
-    text-shadow: 1px 2px 2px rgba(80,0,0,0.6);
-}
-#content h2 {
-    font-size: 24px;
-    margin: 28px 0 14px 0;
-    text-shadow: 1px 1px 1px rgba(20,20,20,0.3);
-}
-#content p {
-    padding-left: 2px;
-    line-height: 1.6em;
-}
-a, a:visited {
-    text-decoration: none;
-    color: #E60B0B;
-}
-a:hover {
-    text-decoration: underline;
-    opacity: 0.8;
-}
-code {
-    display: block;
-    padding: 10px;
-    border: 2px solid #ccc;
-    background-color: rgba(80, 80, 80, .09);
-    margin-bottom: 2px;
-}
-/* Sexy buttons from: http://ubuwaits.github.com/css3-buttons/ */
-button {
-  background: #c63929;
-  background: -moz-linear-gradient(top, #ee432e 0%, #c63929 50%, #b51700 50%, #891100 100%);
-  background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #ee432e), color-stop(0.5, #c63929), color-stop(0.5, #b51700), color-stop(1, #891100));
-  border: 1px solid #951100;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  -moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
-  -webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
-  box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
-  color: #fff;
-  font-family: "helvetica neue", helvetica, arial, sans-serif;
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 1;
-  padding: 12px 0 14px 0;
-  text-align: center;
-  text-shadow: 0px -1px 1px rgba(0, 0, 0, .8);
-  width: 338px;
-  margin-top: 4px;
-}
-button:hover {
-  background: #cb0500;
-  background: -moz-linear-gradient(top, #f37873 0%, #db504d 50%, #cb0500 50%, #a20601 100%);
-  background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #f37873), color-stop(0.5, #db504d), color-stop(0.5, #cb0500), color-stop(1, #a20601));
-  cursor: pointer;
-}
-button:active {
-  background: #b30300;
-  background: -moz-linear-gradient(top, #d43c28 0%, #ad3224 50%, #9c1500 50%, #700d00 100%);
-  background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #d43c28), color-stop(0.5, #ad3224), color-stop(0.5, #9c1500), color-stop(1, #700d00));
-  -moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
-  -webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
-  box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
-}
-button.first {
-    margin-right: 20px;
-}
-ul {
-    list-style-type: square;
-    line-height: 1.5em;
-}
-#copyright {
-    padding-top: 20px;
-    font-size: 12px;
-}
-a.hint {
-    font-size: 11px;
-    font-style: italic;
-    margin-top: 2px;
-    color: #888;
-    float: right;
-}
-</style>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-286321-6']);
-  _gaq.push(['_trackPageview']);
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
+    <title>Redback - Redis-backed persistence for Node.JS</title>
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href='http://fonts.googleapis.com/css?family=Gruppo' rel='stylesheet' type='text/css' />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+    <script type="text/javascript">
+
+    /*
+    Credits
+      jQuery noise: https://github.com/DanielRapp/Noisy
+      Sexy buttons: https://github.com/ubuwaits/css3-buttons
+      Title font:   http://www.google.com/webfonts/family?family=Gruppo
+      Favicon:      http://prothemedesign.com/circular-icons
+    */
+
+    (function(a){a.fn.noisy=function(b){return this.each(function(){var c=document.createElement("canvas"),h=c.getContext("2d");if(!h&&b.fallback!==undefined&&b.fallback!=="")a(this).css("background-image","url("+b.fallback+"),"+a(this).css("background-image"));else{b=a.extend({},a.fn.noisy.defaults,b);c.width=c.height=b.size;for(var d=h.createImageData(c.width,c.height),e=function(i,k){return Math.floor(Math.random()*(k-i)+i)},j=0;j<b.intensity*Math.pow(b.size,2);j++){var f=e(0,c.width),g=e(0,c.height);f=(f+g*d.width)*4;g=e(0,255);d.data[f]=g;d.data[f+1]=b.monochrome?g:e(0,255);d.data[f+2]=b.monochrome?g:e(0,255);d.data[f+3]=e(0,255*b.opacity)}h.putImageData(d,0,0);a(this).data("original-css")==undefined&&a(this).data("original-css",a(this).css("background-image"));a(this).css("background-image","url("+c.toDataURL("image/png")+"),"+a(this).data("original-css"))}})};a.fn.noisy.defaults={intensity:0.9,size:200,opacity:0.08,fallback:"",monochrome:false}})(jQuery);
+
+    $(function () {
+        $('body').noisy({
+            'intensity' : 1,
+            'size' : 200,
+            'opacity' : 0.070,
+            'fallback' : '',
+            'monochrome' : false
+        }).css('background-color', '#FCFCFC');
+    });
+
+    </script>
+
+    <style type="text/css">
+
+        body {
+            background-color: #FCFCFC;
+            font-family: Droid Sans,Arial,Sans Serif;
+            font-size: 16px;
+            margin: 0;
+            border-top: 3px solid #E60B0B;
+            color: #444;
+        }
+        #fork {
+            top: 0;
+            right: 0;
+            position: fixed;
+            z-index: 999;
+            opacity: 0.8;
+        }
+        #tag {
+            float: right;
+            margin-top: 54px;
+        }
+        #fork:hover {
+            opacity: 0.7;
+        }
+        #container {
+            width: 700px;
+            margin: 0 auto;
+        }
+        #header {
+            height: 70px;
+            border-bottom: 2px dotted #bbb;
+            margin-bottom: 10px;
+        }
+        #header h1 {
+            font-family: 'Gruppo',Arial, Sans Serif;
+            font-size: 60px;
+            font-weight: bold;
+            letter-spacing: -1px;
+            text-shadow: 1px 2px 2px rgba(30,30,30,0.6);
+        }
+        #header h1 .red {
+            color: #E60B0B;
+            text-shadow: 1px 2px 2px rgba(80,0,0,0.6);
+        }
+        #content h2 {
+            font-size: 24px;
+            margin: 28px 0 14px 0;
+            text-shadow: 1px 1px 1px rgba(20,20,20,0.3);
+        }
+        #content p {
+            padding-left: 2px;
+            line-height: 1.6em;
+        }
+        a, a:visited {
+            text-decoration: none;
+            color: #E60B0B;
+        }
+        a:hover {
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+        code {
+            display: block;
+            padding: 10px;
+            border: 2px solid #ccc;
+            background-color: rgba(80, 80, 80, .09);
+            margin-bottom: 2px;
+        }
+        button {
+          background: #c63929;
+          background: -moz-linear-gradient(top, #ee432e 0%, #c63929 50%, #b51700 50%, #891100 100%);
+          background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #ee432e), color-stop(0.5, #c63929), color-stop(0.5, #b51700), color-stop(1, #891100));
+          border: 1px solid #951100;
+          -moz-border-radius: 5px;
+          -webkit-border-radius: 5px;
+          border-radius: 5px;
+          -moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
+          -webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
+          box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4), 0 1px 3px #333;
+          color: #fff;
+          font-family: "helvetica neue", helvetica, arial, sans-serif;
+          font-size: 20px;
+          font-weight: bold;
+          line-height: 1;
+          padding: 12px 0 14px 0;
+          text-align: center;
+          text-shadow: 0px -1px 1px rgba(0, 0, 0, .8);
+          width: 338px;
+          margin-top: 7px;
+        }
+        button:hover {
+          background: #cb0500;
+          background: -moz-linear-gradient(top, #f37873 0%, #db504d 50%, #cb0500 50%, #a20601 100%);
+          background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #f37873), color-stop(0.5, #db504d), color-stop(0.5, #cb0500), color-stop(1, #a20601));
+          cursor: pointer;
+        }
+        button:active {
+          background: #b30300;
+          background: -moz-linear-gradient(top, #d43c28 0%, #ad3224 50%, #9c1500 50%, #700d00 100%);
+          background: -webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #d43c28), color-stop(0.5, #ad3224), color-stop(0.5, #9c1500), color-stop(1, #700d00));
+          -moz-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
+          -webkit-box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
+          box-shadow: inset 0px 0px 0px 1px rgba(255, 115, 100, 0.4);
+        }
+        button.first {
+            margin-right: 20px;
+        }
+        ul {
+            list-style-type: square;
+            line-height: 1.5em;
+        }
+        #copyright {
+            padding-top: 20px;
+            font-size: 12px;
+        }
+        a.hint {
+            font-size: 11px;
+            font-style: italic;
+            margin-top: 2px;
+            color: #888;
+            float: right;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-286321-6']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
 </head>
 <body>
+
     <a id="fork" href="https://github.com/chriso/redback">
         <img alt="Fork me on GitHub" src="fork.png" />
     </a>
+
     <div id="container">
         <div id="header">
             <h1><span class="red">Red</span>back</h1>
         </div>
+
         <div id="content">
             <h2>What is it?</h2>
                 <p>A fast, high-level <a class="redis" href="http://redis.io">Redis</a> library for <a class="nodejs" href="http://nodejs.org">Node.JS</a>.</p>
 
                 <p>
-                Redback provides an accessible and extensible interface to the Redis <a href="http://redis.io/topics/data-types">data types</a>.
-
-                You can use Redback as a Cache backend, a Pub/Sub provider, or to create complex data structures such as the
-                <a href="#">SocialGraph</a>,
-                <a href="#">KeyPair</a> or
-                <a href="#">DensitySet</a>.
-
+                    Redback provides an accessible and extensible interface to the Redis <a href="http://redis.io/topics/data-types">data types</a>.
+                    You can use Redback as a Cache backend, a Pub/Sub provider, or to create complex data structures such as the
+                        <a href="#">SocialGraph</a>,
+                        <a href="#">KeyPair</a> or
+                        <a href="#">DensitySet</a>.
                 </p>
 
             <h2>How do I get it?</h2>
@@ -183,10 +200,14 @@ a.hint {
 
             <button class="first" onclick="location.href='https://github.com/chriso/redback';">Source</button>
             <button onclick="location.href='https://github.com/chriso/redback/wiki';">Documentation</button>
+
         </div>
+
         <div id="copyright">
             &copy; Chris O'Hara (<a href="http://github.com/chriso/redback/raw/master/LICENSE">MIT License</a>)
         </div>
+
     </div>
+
 </body>
 </html>
