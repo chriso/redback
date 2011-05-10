@@ -11,7 +11,7 @@ $(function () {
     $('body').noisy({
         'intensity' : 1,
         'size' : 200,
-        'opacity' : 0.088,
+        'opacity' : 0.070,
         'fallback' : '',
         'monochrome' : false
     }).css('background-color', '#FCFCFC');
@@ -66,6 +66,7 @@ body {
 }
 #content p {
     padding-left: 2px;
+    line-height: 1.6em;
 }
 a, a:visited {
     text-decoration: none;
@@ -79,7 +80,7 @@ code {
     display: block;
     padding: 10px;
     border: 2px solid #ccc;
-    background-color: #ddd;
+    background-color: rgba(80, 80, 80, .09);
 }
 /* Sexy buttons from: http://ubuwaits.github.com/css3-buttons/ */
 button {
@@ -125,7 +126,21 @@ ul {
     list-style-type: square;
     line-height: 1.5em;
 }
+#copyright {
+    padding-top: 20px;
+    font-size: 12px;
+}
 </style>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-286321-6']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 </head>
 <body>
     <a id="fork" href="https://github.com/chriso/redback">
@@ -153,12 +168,14 @@ ul {
                 <code>sudo npm install -g redback</code>
 
             <h2>Learn more</h2>
-                <p>See <a href="#">the wiki</a> for documentation and examples, or click below to visit the GitHub repository.</p>
+                <p>See <a href="https://github.com/chriso/redback/wiki">the wiki</a> for documentation and examples, or click below to visit the GitHub repository.</p>
 
-            <button class="first">Source</button>
-            <button>Documentation</button>
+            <button class="first" onclick="location.href='https://github.com/chriso/redback';">Source</button>
+            <button onclick="location.href='https://github.com/chriso/redback/wiki';">Documentation</button>
+        </div>
+        <div id="copyright">
+            &copy; Chris O'Hara (<a href="http://github.com/chriso/redback/raw/master/LICENSE">MIT License</a>)
         </div>
     </div>
-    <div i
 </body>
 </html>
