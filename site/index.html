@@ -83,6 +83,7 @@ code {
     padding: 10px;
     border: 2px solid #ccc;
     background-color: rgba(80, 80, 80, .09);
+    margin-bottom: 2px;
 }
 /* Sexy buttons from: http://ubuwaits.github.com/css3-buttons/ */
 button {
@@ -105,7 +106,7 @@ button {
   text-align: center;
   text-shadow: 0px -1px 1px rgba(0, 0, 0, .8);
   width: 338px;
-  margin-top: 20px;
+  margin-top: 4px;
 }
 button:hover {
   background: #cb0500;
@@ -132,6 +133,13 @@ ul {
     padding-top: 20px;
     font-size: 12px;
 }
+a.hint {
+    font-size: 11px;
+    font-style: italic;
+    margin-top: 2px;
+    color: #888;
+    float: right;
+}
 </style>
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -157,17 +165,18 @@ ul {
                 <p>A fast, high-level <a class="redis" href="http://redis.io">Redis</a> library for <a class="nodejs" href="http://nodejs.org">Node.JS</a>.</p>
 
                 <p>
-                Redback provides easy access to the built-in Redis <a href="http://redis.io/topics/data-types">data types</a>.
+                Redback provides an accessible and extensible interface to the Redis <a href="http://redis.io/topics/data-types">data types</a>.
 
-                It allows you to build and use higher level data structures such as the
+                You can use Redback as a Cache backend, a Pub/Sub provider, or to create complex data structures such as the
                 <a href="#">SocialGraph</a>,
-                <a href="#">KeyPair</a> and
+                <a href="#">KeyPair</a> or
                 <a href="#">DensitySet</a>.
 
                 </p>
 
             <h2>How do I get it?</h2>
                 <code>sudo npm install -g redback</code>
+                <a class="hint" href="#">Don't have NPM or Node.JS?</a>
 
             <h2>Learn more</h2>
                 <p>See <a href="https://github.com/chriso/redback/wiki">the wiki</a> for documentation and examples, or click below to visit the GitHub repository.</p>
