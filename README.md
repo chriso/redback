@@ -15,9 +15,9 @@ Redback provides an accessible and extensible interface to the Redis [data types
 - **Channel**
 - **Cache**
 
-It also comes with the following advanced data structures:
+It also comes with the following more advanced data structures:
 
-- **DensitySet** - A sorted set. Adding an element increments its score, and removing decrements it.
+- **DensitySet** - A sorted set where adding an element increments its score, and removing decrements it.
 - **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
