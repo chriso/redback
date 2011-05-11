@@ -15,7 +15,7 @@ Redback provides an accessible and extensible interface to the Redis [data types
 - **Channel**
 - **Cache**
 
-It also comes with the following more advanced data structures:
+It also comes with the following advanced data structures:
 
 - **DensitySet** - A sorted set where adding an element increments its score and removing it decrements it.
 - **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
@@ -41,7 +41,6 @@ It also comes with the following more advanced data structures:
 
 To create your own structure, use `addStructure(name, methods)`.
 
-
 Let's create a queue that can be either FIFO or LIFO
 
     redback.addStructure('Queue', {
@@ -63,9 +62,9 @@ To use the queue, call `createQueue(key, is_fifo)`
     queue.add('awesome!', callback);
 
 Structures have access to a Redis key `this.key` and the Redis client
-`this.client`. If an `init()` method is defined, then it is called after
+`this.client`. If an `init()` method is defined then it is called after
 the structure is instantiated. Also note that `init()` receives any extra parameters
-when calling `create<structure>()`.
+from `create<structure>()`.
 
 ## Other uses
 
