@@ -1,14 +1,10 @@
-**redback** - [Redis](http://redis.io/)-backed persistence for [Node.JS](http://nodejs.org/)
-
-Follow [redbackjs.com](http://redbackjs.com/) and [@chris6F](twitter.com/chris6F) for updates.
-
-## Installation
+**redback** - A high-level Redis library for Node.JS. Follow [redbackjs.com](http://redbackjs.com/) and [@chris6F](twitter.com/chris6F) for updates.
 
     npm install -g redback
 
 ## What is it?
 
-Redback is a high-level library for Redis. It provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease. Redback comes with the following built-in structures:
+Redback provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease. Redback comes with the following built-in structures:
 
 - **List**
 - **Set**
@@ -16,10 +12,10 @@ Redback is a high-level library for Redis. It provides an accessible and extensi
 - **Hash**
 - **Channel**
 - **Cache**
-- *DensitySet*
-- *KeyPair*
-- *SocialGraph*
-- *CappedList*
+- **DensitySet**
+- **KeyPair**
+- **SocialGraph**
+- **CappedList**
 
 ## Usage
 
