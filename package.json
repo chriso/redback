@@ -1,6 +1,6 @@
 { "name"          : "redback",
   "description"   : "A high-level Redis library",
-  "version"       : "0.1.1",
+  "version"       : "0.1.2",
   "homepage"      : "https://github.com/chriso/redback",
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
