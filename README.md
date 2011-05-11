@@ -4,11 +4,7 @@
 
 ## What is it?
 
-Redback provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease.
-
-It comes with useful atomic helper methods, such as creating auto-incrementing keys
-
-Redback comes with the following built-in structures:
+Redback provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease. Redback comes with the following built-in structures:
 
 - **List**
 - **Set**
@@ -19,9 +15,8 @@ Redback comes with the following built-in structures:
 
 It also comes with the following advanced data structures:
 
-- **DensitySet** - A sorted set where scores are based on the density of
-  the element. Adding an element increments its score, and removing decrements it.
-- **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to unique values
+- **DensitySet** - A sorted set. Adding an element increments its score, and removing decrements it.
+- **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
 
@@ -31,11 +26,14 @@ It also comes with the following advanced data structures:
 
     //redback.create<Structure>(key)
 
-    var user = redback.createHash('user1');
+    var user1 = redback.createHash('user1');
     user.set({username:'chris', password:'redisisawesome'}, callback);
 
     var log = redback.createCappedList('log', 1000);
     log.push('Log message ...');
+
+    var user3 = redback.createSocialGraph(3);
+    user3.follow(1, callback);
 
 ## Creating your own structures
 
@@ -63,23 +61,21 @@ Let's create a queue that can be either FIFO or LIFO
 To use the queue, call `createQueue(key, is_fifo)`
 
     var queue = redback.createQueue('my_queue', true);
-
     queue.add('awesome!', callback);
 
 ## Other uses
 
-You can also use Redis as a cache backend or as a pub/sub provider
-
 **Cache backend**
 
-    var cache = redback.createCache();
+    var cache = redback.createCache(namespace);
     cache.set('foo', 'bar', callback);
+    cache.get('foo', function (err, foo) {
+        console.log(foo); //bar
+    });
 
 **Pub/sub provider**
 
-    var channel = redback.createChannel('chat');
-
-    channel.subscribe();
+    var channel = redback.createChannel('chat').subscribe();
 
     //To received messages
     channel.on('message', function (msg) {
