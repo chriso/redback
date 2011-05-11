@@ -4,7 +4,11 @@
 
 ## What is it?
 
-Redback provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease. Redback comes with the following built-in structures:
+Redback provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease.
+
+It comes with useful atomic helper methods, such as creating auto-incrementing keys
+
+Redback comes with the following built-in structures:
 
 - **List**
 - **Set**
@@ -12,10 +16,13 @@ Redback provides an accessible and extensible interface to the Redis [data types
 - **Hash**
 - **Channel**
 - **Cache**
-- **DensitySet**
-- **KeyPair**
-- **SocialGraph**
-- **CappedList**
+
+It also comes with the following advanced data structures:
+
+- **DensitySet** - A sorted set where scores are based on the density of the element. Adding increments the score, removing decrements it.
+- **KeyPair** - Uses two hash structures and an auto-incrementing key to assign unique values an ID
+- **SocialGraph** - Similar to Twitter's (following vs. followers)
+- **CappedList** - A list with a fixed length
 
 ## Usage
 
