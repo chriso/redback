@@ -19,8 +19,9 @@ Redback comes with the following built-in structures:
 
 It also comes with the following advanced data structures:
 
-- **DensitySet** - A sorted set where scores are based on the density of the element. Adding increments the score, removing decrements it.
-- **KeyPair** - Uses two hash structures and an auto-incrementing key to assign unique values an ID
+- **DensitySet** - A sorted set where scores are based on the density of
+  the element. Adding an element increments its score, and removing decrements it.
+- **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to unique values
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
 
@@ -88,6 +89,9 @@ You can also use Redis as a cache backend or as a pub/sub provider
     //To send messages
     channel.publish(msg);
 
+## Want to learn more?
+
+For now, see the [annotated source](http://redbackjs.com/api.html) for more information.
 
 ## License
 
