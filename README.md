@@ -1,4 +1,6 @@
-**redback** - A high-level Redis library for Node.JS. Follow [redbackjs.com](http://redbackjs.com/) and [@chris6F](twitter.com/chris6F) for updates.
+**redback** - A high-level Redis library for Node.JS.
+
+Follow [redbackjs.com](http://redbackjs.com/) and [@chris6F](twitter.com/chris6F) for updates.
 
     npm install -g redback
 
