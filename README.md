@@ -2,35 +2,38 @@
 
 Follow [redbackjs.com](http://redbackjs.com/) and [@chris6F](twitter.com/chris6F) for updates.
 
-### What is it?
+## Installation
+
+    npm install -g redback
+
+## What is it?
 
 Redback is a high-level library for Redis. It provides an accessible and extensible interface to the Redis [data types](http://redis.io/topics/data-types) and allows you to roll your own structures with ease. Redback comes with the following built-in structures:
 
-- List
-- Set
-- SortedSet
-- Hash
-- Channel
-- Cache
-
-There's also some more advanced structures available:
-
+- **List**
+- **Set**
+- **SortedSet**
+- **Hash**
+- **Channel**
+- **Cache**
 - *DensitySet*
 - *KeyPair*
 - *SocialGraph*
 - *CappedList*
 
-### Usage
+## Usage
 
     var redback = require('redback').createClient();
 
-    //Call: redback.create<structure>(key); where <structure> is any of the structures listed above
+    //redback.create<Structure>(key)
 
-    var list = redback.createList('my_list');
+    var user = redback.createHash('user1');
+    user.set({username:'chris', password:'redisisawesome'}, callback);
 
-    list.push(['foo','bar'], callback);
+    var log = redback.createCappedList('log', 1000);
+    log.push('Log message ...');
 
-### Creating your own structures
+## Creating your own structures
 
 To create your own structure, use `addStructure(name, methods)`.
 Structures have access to a Redis key `this.key` and the Redis client
@@ -59,7 +62,7 @@ To use the queue, call `createQueue(key, is_fifo)`
 
     queue.add('awesome!', callback);
 
-### Other uses
+## Other uses
 
 You can also use Redis as a cache backend or as a pub/sub provider
 
@@ -82,13 +85,8 @@ You can also use Redis as a cache backend or as a pub/sub provider
     //To send messages
     channel.publish(msg);
 
-### Installation
 
-    npm install -g redback
-
-If you don't have Node.JS or NPM, see [this page](https://github.com/chriso/redback/wiki/Node.JS-and-NPM).
-
-### License
+## License
 
 (MIT License)
 
