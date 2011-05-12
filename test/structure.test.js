@@ -4,7 +4,7 @@ var redback = require('redback'),
     Hash = redback.Hash,
     List = redback.List;
 
-var hash = new Hash(), list = new List(), structure = new Structure();
+var hash = new Hash(null, 'hash'), list = new List(null, 'list'), structure = new Structure(null, 'structure');
 
 module.exports = {
 
@@ -44,6 +44,19 @@ module.exports = {
         assert.equal('bar', hash.bar());
         assert.ok(typeof structure.bar === 'undefined');
         assert.ok(typeof list.bar === 'undefined');
+    },
+
+    'test creating a structure with no key': function () {
+        var structures = [
+            'List','Hash','Set','SortedSet','CappedList','DensitySet',
+            'Channel','KeyPair','SocialGraph'
+        ];
+
+        structures.forEach(function (structure) {
+            assert.throws(function () {
+                redback['create' + Structure]();
+            });
+        });
     }
 
 }
