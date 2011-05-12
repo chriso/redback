@@ -24,6 +24,7 @@ It also comes with the following advanced data structures:
 
 ## Usage
 
+```javascript
     var redback = require('redback').createClient();
 
     //redback.create<Structure>(key)
@@ -36,6 +37,7 @@ It also comes with the following advanced data structures:
 
     var user3 = redback.createSocialGraph(3);
     user3.follow(1, callback);
+```
 
 ## Creating your own structures
 
@@ -43,6 +45,7 @@ To create your own structure, use `addStructure(name, methods)`.
 
 Let's create a queue that can be either FIFO or LIFO
 
+```javascript
     redback.addStructure('Queue', {
         init: function (is_fifo) {
             this.fifo = is_fifo;
@@ -55,11 +58,14 @@ Let's create a queue that can be either FIFO or LIFO
             this.client[method](this.key, callback);
         }
     });
+```
 
 To use the queue, call `createQueue(key, is_fifo)`
 
+```javascript
     var queue = redback.createQueue('my_queue', true);
     queue.add('awesome!', callback);
+```
 
 Structures have access to a Redis key `this.key` and the Redis client
 `this.client`. If an `init()` method is defined then it is called after
@@ -70,14 +76,17 @@ from `create<structure>()`.
 
 **Cache backend**
 
+```javascript
     var cache = redback.createCache(namespace);
     cache.set('foo', 'bar', callback);
     cache.get('foo', function (err, foo) {
         console.log(foo); //bar
     });
+```
 
 **Pub/sub provider**
 
+```javascript
     var channel = redback.createChannel('chat').subscribe();
 
     //To received messages
@@ -87,10 +96,15 @@ from `create<structure>()`.
 
     //To send messages
     channel.publish(msg);
+```
 
 ## Want to learn more?
 
 For now, see the [annotated source](http://redbackjs.com/api.html) for more information.
+
+## Credits
+
+- Matt Ranney for his awesome [node_redis](https://github.com/mranney/node_redis) library.
 
 ## License
 
