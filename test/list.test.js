@@ -293,6 +293,35 @@ module.exports = {
                 });
             });
         });
-    }
+    },
 
+/*
+    'test blocking list operations - pop': function () {
+        var list = redback.createList('test_list_blocking_pop'), added = false;
+
+        list.pop(1, function (err, value) {
+            if (!added) return assert.ok(false);
+            assert.equal('foo', value);
+        });
+
+        setTimeout(function () {
+            list.push('foo');
+            added = true;
+        }, 100);
+    },
+
+    'test blocking list operations - shift': function () {
+        var list = redback.createList('test_list_blocking_shift'), added = false;
+
+        list.shift(1, function (err, value) {
+            if (!added) return assert.ok(false);
+            assert.equal('foo', value);
+        });
+
+        setTimeout(function () {
+            list.push('foo');
+            added = true;
+        }, 100);
+    }
+*/
 }
