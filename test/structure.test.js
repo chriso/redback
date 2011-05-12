@@ -116,6 +116,28 @@ module.exports = {
                 });
             });
         });
+    },
+
+    'test structure (bg)save and destroy': function () {
+        var hash = redback.createHash('test_structure_destroy');
+
+        redback.save(function (err) {
+            assert.ok(!err);
+        });
+        redback.save(true, function (err) {
+            assert.ok(!err);
+        });
+
+        hash.set('foo', 'bar', function (err) {
+            hash.get('foo', function (err, value) {
+                assert.equal('bar', value);
+                hash.destroy(function (err) {
+                    hash.get('foo', function (err, value) {
+                        assert.equal(null, value);
+                    });
+                });
+            });
+        });
     }
 
 }
