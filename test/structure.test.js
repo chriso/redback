@@ -63,7 +63,7 @@ module.exports = {
 
         structures.forEach(function (structure) {
             assert.throws(function () {
-                redback['create' + Structure]();
+                redback['create' + structure]();
             });
         });
 
@@ -138,6 +138,11 @@ module.exports = {
                 });
             });
         });
+    },
+
+    'test an array key': function () {
+        var hash = redback.createHash(['user', 1]);
+        assert.equal('user:1', hash.key);
     }
 
 }
