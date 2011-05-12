@@ -52,7 +52,7 @@ redback.addStructure('Queue', {
         this.client.lpush(this.key, value, callback);
     },
     next: function (callback) {
-        var method = this.fifo ? 'lpop' : 'rpop';
+        var method = this.fifo ? 'rpop' : 'lpop';
         this.client[method](this.key, callback);
     }
 });
