@@ -4,6 +4,15 @@ var redback = require('redback'),
     Hash = redback.Hash,
     List = redback.List;
 
+redback = redback.createClient();
+
+//Flush the DB and close the Redis connection after 500ms
+setTimeout(function () {
+    redback.client.flushdb(function (err) {
+        redback.client.quit();
+    });
+}, 500);
+
 var hash = new Hash(null, 'hash'), list = new List(null, 'list'), structure = new Structure(null, 'structure');
 
 module.exports = {
@@ -55,6 +64,56 @@ module.exports = {
         structures.forEach(function (structure) {
             assert.throws(function () {
                 redback['create' + Structure]();
+            });
+        });
+
+        //Cache doesn't require a key..
+        redback.createCache();
+    },
+
+    'test adding a custom structure': function () {
+        redback.addStructure('TestQueue', {
+            init: function (is_fifo) {
+                this.fifo = is_fifo;
+            },
+            add: function (value, callback) {
+                this.client.lpush(this.key, value, callback);
+            },
+            next: function (callback) {
+                var method = this.fifo ? 'rpop' : 'lpop';
+                this.client[method](this.key, callback);
+            }
+        });
+
+        var lifo = redback.createTestQueue('test_addstructure_lifo_queue');
+
+        lifo.add('foo', function (err) {
+            lifo.add('bar', function (err) {
+                lifo.next(function (err, value) {
+                    assert.equal('bar', value);
+                    lifo.next(function (err, value) {
+                        assert.equal('foo', value);
+                        lifo.next(function (err, value) {
+                            assert.equal(null, value);
+                        });
+                    });
+                });
+            });
+        });
+
+        var fifo = redback.createTestQueue('test_addstructure_fifo_queue', true);
+
+        fifo.add('foo', function (err) {
+            fifo.add('bar', function (err) {
+                fifo.next(function (err, value) {
+                    assert.equal('foo', value);
+                    fifo.next(function (err, value) {
+                        assert.equal('bar', value);
+                        fifo.next(function (err, value) {
+                            assert.equal(null, value);
+                        });
+                    });
+                });
             });
         });
     }
