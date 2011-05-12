@@ -94,6 +94,30 @@ module.exports = {
                 });
             });
         });
+    },
+
+    'test capped list unshift': function () {
+        var list = redback.createCappedList('test_cappedlist_unshift', 3);
+
+        list.unshift(['a','b'], function (err) {
+            list.unshift('c', function (err) {
+                list.values(function (err, values) {
+                    assert.equal(3, values.length);
+                    assert.equal('c', values.shift());
+                    assert.equal('a', values.shift());
+                    assert.equal('b', values.shift());
+
+                    list.unshift('z', function (err) {
+                        list.values(function (err, values) {
+                            assert.equal(3, values.length);
+                            assert.equal('c', values.shift());
+                            assert.equal('a', values.shift());
+                            assert.equal('b', values.shift());
+                        });
+                    });
+                });
+            });
+        });
     }
 
 }

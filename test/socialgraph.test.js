@@ -151,6 +151,11 @@ module.exports = {
                         while (l--) assert.equal(expected.shift(), common.shift());
                     });
 
+                    user1.getCommonFollowing([user2, 3], function (err, common) {
+                        var expected = [5,7], l = expected.length;
+                        while (l--) assert.equal(expected.shift(), common.shift());
+                    });
+
                     user1.getCommonFollowers(9, function (err, common) {
                         var expected = [2], l = expected.length;
                         while (l--) assert.equal(expected.shift(), common.shift());

@@ -18,6 +18,10 @@ module.exports = {
             keypair.add('bar', function (err, id) {
                 assert.equal(2, id);
 
+                keypair.add('bar', function (err, id) {
+                    assert.equal(2, id);
+                });
+
                 keypair.length(function (err, length) {
                     assert.equal(2, length);
                 });

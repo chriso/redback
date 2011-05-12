@@ -234,6 +234,14 @@ module.exports = {
                 assert.equal(2, set.bar);
             });
 
+            zset.countScores(1, 3, function (err, count) {
+                assert.equal(3, count);
+            });
+
+            zset.countScores(5, null, function (err, count) {
+                assert.equal(0, count);
+            });
+
             zset.getScores(2, 3, function (err, set) {
                 var expected = ['bar','foobar'], i;
                 for (i in set) {

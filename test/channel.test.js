@@ -30,6 +30,9 @@ module.exports = {
         });
 
         setTimeout(function () {
+            channel.unsubscribe(function(){
+                assert.ok(true);
+            });
             assert.ok(received);
         }, 200);
     }
