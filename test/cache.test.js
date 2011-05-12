@@ -83,7 +83,7 @@ module.exports = {
     'test cache increment': function () {
         var cache = redback.createCache('test_cache_increment');
 
-        cache.set('foo', 1, function (err) {
+        cache.set('foo', 1, 1, function (err) {
             cache.increment('foo', function (err) {
                 cache.get('foo', function (err, value) {
                     assert.equal(2, value);
