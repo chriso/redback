@@ -143,6 +143,30 @@ module.exports = {
     'test an array key': function () {
         var hash = redback.createHash(['user', 1]);
         assert.equal('user:1', hash.key);
-    }
+    },
 
+/*
+    'test structure expiries': function () {
+        var hash = redback.createHash('test_structure_expiry');
+        hash.expire(1, function (err) {
+            hash.ttl(function (err, ttl) {
+                assert.equal(1, ttl);
+
+                hash.persist(function (err) {
+                    hash.ttl(function (err, ttl) {
+                        assert.equal(-1, ttl);
+                    });
+                });
+            });
+        });
+
+        var set = redback.createSet('test_structure_expiry2');
+        var when = new Date();
+        set.expireAt(when, function (err) {
+            set.ttl(function (err, ttl) {
+                assert.equal(1, ttl);
+            });
+        });
+    }
+*/
 }

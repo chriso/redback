@@ -170,7 +170,34 @@ module.exports = {
                 });
             });
         });
-    }
+    },
 
+/*
+    'test cache expiries': function () {
+        var cache = redback.createCache('test_cache_expiries');
+
+        cache.set({foo: 'a', foo2: 'b', foo3: 'c', bar: 'd'}, function (err) {
+
+            cache.expire('foo', 1, function (err) {
+                cache.ttl('foo', function (err, ttl) {
+                    assert.equal(1, ttl);
+
+                    cache.persist('foo', function (err) {
+                        cache.ttl('foo', function (err, ttl) {
+                            assert.equal(-1, ttl);
+                        });
+                    });
+                });
+            });
+
+            var when = new Date();
+            cache.expireAt('foo2', when, function (err) {
+                cache.ttl('foo2', function (err, ttl) {
+                    assert.equal(1, ttl);
+                });
+            });
+        });
+    }
+*/
 }
 
