@@ -145,6 +145,32 @@ module.exports = {
         assert.equal('user:1', hash.key);
     },
 
+    'test get type': function () {
+        var hash = redback.createHash('test_get_type');
+
+        hash.type(function (err, type) {
+            assert.equal('none', type);
+            hash.set('foo', 'bar', function (err) {
+                hash.type(function (err, type) {
+                    assert.equal('hash', type);
+                });
+            });
+        });
+    },
+
+    'test renaming a structure': function () {
+        var hash = redback.createHash('test_rename_hash1'),
+            hash2 = redback.createHash('test_rename_hash2');
+
+        hash.set('foo', 'bar', function (err) {
+            hash.rename('test_rename_hash2', function (err) {
+                hash2.get('foo', function (err, value) {
+                    assert.equal('bar', value);
+                });
+            });
+        });
+    }
+
 /*
     'test structure expiries': function () {
         var hash = redback.createHash('test_structure_expiry');
