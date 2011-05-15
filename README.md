@@ -17,6 +17,7 @@ It also comes with the following advanced data structures:
 - **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
+- **FullText** - A full text index with support for stop words, stemming and basic boolean search
 
 *More coming soon!*
 
@@ -25,16 +26,18 @@ It also comes with the following advanced data structures:
 ```javascript
 var redback = require('redback').createClient();
 
-//redback.create<Structure>(key)
+var user3 = redback.createSocialGraph(3);
+user3.follow(1, callback);
+
+var text = redback.createFullText('my_index');
+text.indexFile({1: 'file1.txt, 2: 'file2.txt}, callback);
+text.search('foo bar -exclude -these -words', callback);
 
 var user1 = redback.createHash('user1');
 user.set({username:'chris', password:'redisisawesome'}, callback);
 
 var log = redback.createCappedList('log', 1000);
 log.push('Log message ...');
-
-var user3 = redback.createSocialGraph(3);
-user3.follow(1, callback);
 ```
 
 ## Creating your own structures

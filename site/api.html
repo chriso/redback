@@ -135,7 +135,8 @@ code .this { color: #19469D; }</style>
  </p>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>];</code></pre>
+<pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>,
+                <span class="string">'FullText'</span>];</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -344,6 +345,24 @@ for structures.</p>
 <td class="code">
 <pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">ttl</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
     <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ttl</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Checks whether the structure has an expiry.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">isVolatile</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ttl</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="keyword">function</span> (<span class="variable">err</span>, <span class="variable">ttl</span>) {
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>, <span class="keyword">null</span>);
+        <span class="variable">callback</span>(<span class="keyword">null</span>, <span class="variable">ttl</span> != -<span class="number integer">1</span>);
+    });
     <span class="keyword">return</span> <span class="this">this</span>;
 }</code></pre>
 </td>
@@ -2066,6 +2085,201 @@ an element will increment/decrement its score, e.g.
     <span class="keyword">return</span> <span class="this">this</span>;
 }</code></pre>
 </td>
+</tr><tr class="filename"><td><h2 id="lib/advanced_structures/FullText.js"><a href="#">FullText</a></h2></td><td>lib/advanced_structures/FullText.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>),
+    <span class="class">EventEmitter</span> = <span class="variable">require</span>(<span class="string">'events'</span>).<span class="class">EventEmitter</span>,
+    <span class="variable">fs</span> = <span class="variable">require</span>(<span class="string">'fs'</span>);</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Stop words - words that shouldn't be indexed.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">stopwords</span> = {
+    <span class="string">'a'</span>:<span class="number integer">1</span>,<span class="string">'able'</span>:<span class="number integer">1</span>,<span class="string">'about'</span>:<span class="number integer">1</span>,<span class="string">'across'</span>:<span class="number integer">1</span>,<span class="string">'after'</span>:<span class="number integer">1</span>,<span class="string">'all'</span>:<span class="number integer">1</span>,<span class="string">'almost'</span>:<span class="number integer">1</span>,<span class="string">'also'</span>:<span class="number integer">1</span>,<span class="string">'am'</span>:<span class="number integer">1</span>,<span class="string">'among'</span>:<span class="number integer">1</span>,
+    <span class="string">'an'</span>:<span class="number integer">1</span>,<span class="string">'and'</span>:<span class="number integer">1</span>,<span class="string">'any'</span>:<span class="number integer">1</span>,<span class="string">'are'</span>:<span class="number integer">1</span>,<span class="string">'as'</span>:<span class="number integer">1</span>,<span class="string">'at'</span>:<span class="number integer">1</span>,<span class="string">'be'</span>:<span class="number integer">1</span>,<span class="string">'because'</span>:<span class="number integer">1</span>,<span class="string">'been'</span>:<span class="number integer">1</span>,<span class="string">'but'</span>:<span class="number integer">1</span>,<span class="string">'by'</span>:<span class="number integer">1</span>,<span class="string">'can'</span>:<span class="number integer">1</span>,
+    <span class="string">'cannot'</span>:<span class="number integer">1</span>,<span class="string">'could'</span>:<span class="number integer">1</span>,<span class="string">'dear'</span>:<span class="number integer">1</span>,<span class="string">'did'</span>:<span class="number integer">1</span>,<span class="string">'do'</span>:<span class="number integer">1</span>,<span class="string">'does'</span>:<span class="number integer">1</span>,<span class="string">'either'</span>:<span class="number integer">1</span>,<span class="string">'else'</span>:<span class="number integer">1</span>,<span class="string">'ever'</span>:<span class="number integer">1</span>,<span class="string">'every'</span>:<span class="number integer">1</span>,
+    <span class="string">'for'</span>:<span class="number integer">1</span>,<span class="string">'from'</span>:<span class="number integer">1</span>,<span class="string">'get'</span>:<span class="number integer">1</span>,<span class="string">'got'</span>:<span class="number integer">1</span>,<span class="string">'had'</span>:<span class="number integer">1</span>,<span class="string">'has'</span>:<span class="number integer">1</span>,<span class="string">'have'</span>:<span class="number integer">1</span>,<span class="string">'he'</span>:<span class="number integer">1</span>,<span class="string">'her'</span>:<span class="number integer">1</span>,<span class="string">'hers'</span>:<span class="number integer">1</span>,<span class="string">'him'</span>:<span class="number integer">1</span>,<span class="string">'his'</span>:<span class="number integer">1</span>,
+    <span class="string">'how'</span>:<span class="number integer">1</span>,<span class="string">'however'</span>:<span class="number integer">1</span>,<span class="string">'i'</span>:<span class="number integer">1</span>,<span class="string">'if'</span>:<span class="number integer">1</span>,<span class="string">'in'</span>:<span class="number integer">1</span>,<span class="string">'into'</span>:<span class="number integer">1</span>,<span class="string">'is'</span>:<span class="number integer">1</span>,<span class="string">'it'</span>:<span class="number integer">1</span>,<span class="string">'its'</span>:<span class="number integer">1</span>,<span class="string">'just'</span>:<span class="number integer">1</span>,<span class="string">'least'</span>:<span class="number integer">1</span>,<span class="string">'let'</span>:<span class="number integer">1</span>,
+    <span class="string">'like'</span>:<span class="number integer">1</span>,<span class="string">'likely'</span>:<span class="number integer">1</span>,<span class="string">'may'</span>:<span class="number integer">1</span>,<span class="string">'me'</span>:<span class="number integer">1</span>,<span class="string">'might'</span>:<span class="number integer">1</span>,<span class="string">'most'</span>:<span class="number integer">1</span>,<span class="string">'must'</span>:<span class="number integer">1</span>,<span class="string">'my'</span>:<span class="number integer">1</span>,<span class="string">'neither'</span>:<span class="number integer">1</span>,<span class="string">'no'</span>:<span class="number integer">1</span>,
+    <span class="string">'nor'</span>:<span class="number integer">1</span>,<span class="string">'not'</span>:<span class="number integer">1</span>,<span class="string">'of'</span>:<span class="number integer">1</span>,<span class="string">'off'</span>:<span class="number integer">1</span>,<span class="string">'often'</span>:<span class="number integer">1</span>,<span class="string">'on'</span>:<span class="number integer">1</span>,<span class="string">'only'</span>:<span class="number integer">1</span>,<span class="string">'or'</span>:<span class="number integer">1</span>,<span class="string">'other'</span>:<span class="number integer">1</span>,<span class="string">'our'</span>:<span class="number integer">1</span>,<span class="string">'own'</span>:<span class="number integer">1</span>,
+    <span class="string">'rather'</span>:<span class="number integer">1</span>,<span class="string">'said'</span>:<span class="number integer">1</span>,<span class="string">'say'</span>:<span class="number integer">1</span>,<span class="string">'says'</span>:<span class="number integer">1</span>,<span class="string">'she'</span>:<span class="number integer">1</span>,<span class="string">'should'</span>:<span class="number integer">1</span>,<span class="string">'since'</span>:<span class="number integer">1</span>,<span class="string">'so'</span>:<span class="number integer">1</span>,<span class="string">'some'</span>:<span class="number integer">1</span>,<span class="string">'than'</span>:<span class="number integer">1</span>,
+    <span class="string">'that'</span>:<span class="number integer">1</span>,<span class="string">'the'</span>:<span class="number integer">1</span>,<span class="string">'their'</span>:<span class="number integer">1</span>,<span class="string">'them'</span>:<span class="number integer">1</span>,<span class="string">'then'</span>:<span class="number integer">1</span>,<span class="string">'there'</span>:<span class="number integer">1</span>,<span class="string">'these'</span>:<span class="number integer">1</span>,<span class="string">'they'</span>:<span class="number integer">1</span>,<span class="string">'this'</span>:<span class="number integer">1</span>,<span class="string">'tis'</span>:<span class="number integer">1</span>,
+    <span class="string">'to'</span>:<span class="number integer">1</span>,<span class="string">'too'</span>:<span class="number integer">1</span>,<span class="string">'twas'</span>:<span class="number integer">1</span>,<span class="string">'us'</span>:<span class="number integer">1</span>,<span class="string">'wants'</span>:<span class="number integer">1</span>,<span class="string">'was'</span>:<span class="number integer">1</span>,<span class="string">'we'</span>:<span class="number integer">1</span>,<span class="string">'were'</span>:<span class="number integer">1</span>,<span class="string">'what'</span>:<span class="number integer">1</span>,<span class="string">'when'</span>:<span class="number integer">1</span>,<span class="string">'where'</span>:<span class="number integer">1</span>,
+    <span class="string">'which'</span>:<span class="number integer">1</span>,<span class="string">'while'</span>:<span class="number integer">1</span>,<span class="string">'who'</span>:<span class="number integer">1</span>,<span class="string">'whom'</span>:<span class="number integer">1</span>,<span class="string">'why'</span>:<span class="number integer">1</span>,<span class="string">'will'</span>:<span class="number integer">1</span>,<span class="string">'with'</span>:<span class="number integer">1</span>,<span class="string">'would'</span>:<span class="number integer">1</span>,<span class="string">'yet'</span>:<span class="number integer">1</span>,<span class="string">'you'</span>:<span class="number integer">1</span>,
+    <span class="string">'your'</span>:<span class="number integer">1</span>,<span class="string">''</span>:<span class="number integer">1</span>
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>A full text index with support for stop words, stemming and
+a basic boolean search syntax.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createFullText(key);</code></p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/topics/data-types#sets</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)key:&lt;word1&gt; = set(docs)</code>
+   <code>(namespace:)key:&lt;word2&gt; = set(docs)</code>
+   <code>(namespace:)key:&lt;wordN&gt; = set(docs)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">FullText</span> = <span class="variable">exports</span>.<span class="class">FullText</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Index one or more documents.</p>
+
+<h2>Index One Document</h2>
+
+<p>   <code>text.indexFile(1, 'document string ...', callback);</code></p>
+
+<h2>Index Many Documents</h2>
+
+<p>   <code>text.indexFile({1:'docstr1', 2:'docstr2'}, callback);</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int | string</em>  id - the document's unique identifier</p></li><li><p><strong>param</strong>: <em>string | ReadableStream | Buffer</em>  document</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">FullText</span>.<span class="variable">prototype</span>.<span class="variable">index</span> = <span class="keyword">function</span> (<span class="variable">id</span>, <span class="variable">document</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">id</span> === <span class="string">'object'</span>) {
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">indexAll</span>(<span class="variable">id</span>, <span class="variable">document</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">document</span> <span class="variable">instanceof</span> <span class="class">EventEmitter</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>;
+            <span class="keyword">typeof</span> <span class="variable">document</span>.<span class="variable">readable</span> !== <span class="string">'undefined'</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">document</span>.<span class="variable">readable</span> === <span class="variable">true</span>) {
+        <span class="keyword">return</span> <span class="variable">indexStream</span>(<span class="variable">id</span>, <span class="variable">document</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">document</span> <span class="variable">instanceof</span> <span class="class">Buffer</span>) {
+        <span class="variable">document</span> = <span class="variable">document</span>.<span class="variable">toString</span>();
+    }
+    <span class="this">this</span>.<span class="variable">indexed_bytes</span> += <span class="variable">document</span>.<span class="variable">length</span>;
+    <span class="keyword">var</span> <span class="variable">stemmed</span> = <span class="this">this</span>.<span class="variable">stemWords</span>(<span class="this">this</span>.<span class="variable">extractWords</span>(<span class="variable">document</span>));
+    <span class="this">this</span>.<span class="variable">buildIndex</span>(<span class="variable">id</span>, <span class="variable">stemmed</span>, <span class="variable">callback</span> || <span class="keyword">function</span> () {});
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Index one or more files.</p>
+
+<h2>Index One Document</h2>
+
+<p>   <code>text.indexFile(1, '/path/to/file', callback);</code></p>
+
+<h2>Index Many Documents</h2>
+
+<p>   <code>text.indexFile({1:'file1', 2:'file2'}, callback);</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int | string | Object</em>  id</p></li><li><p><strong>param</strong>: <em>string</em>  filename (optional)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">FullText</span>.<span class="variable">prototype</span>.<span class="variable">indexFile</span> =
+<span class="class">FullText</span>.<span class="variable">prototype</span>.<span class="variable">indexFiles</span> = <span class="keyword">function</span> (<span class="variable">id</span>, <span class="variable">filename</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">id</span> === <span class="string">'object'</span>) {
+        <span class="variable">callback</span> = <span class="variable">filename</span>;
+        <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>, <span class="variable">files</span> = <span class="variable">id</span>, <span class="variable">ids</span> = <span class="class">Object</span>.<span class="variable">keys</span>(<span class="variable">files</span>),
+            <span class="variable">failed</span> = <span class="variable">false</span>, <span class="variable">remaining</span> = <span class="variable">ids</span>.<span class="variable">length</span>;
+        <span class="variable">ids</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">id</span>) {
+            <span class="variable">self</span>.<span class="variable">indexStream</span>(<span class="variable">id</span>, <span class="variable">fs</span>.<span class="variable">createReadStream</span>(<span class="variable">files</span>[<span class="variable">id</span>]), <span class="keyword">function</span> (<span class="variable">err</span>) {
+                <span class="keyword">if</span> (<span class="variable">failed</span>) {
+                    <span class="keyword">return</span>;
+                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">err</span>) {
+                    <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>);
+                } <span class="keyword">else</span> {
+                    <span class="keyword">if</span> (!--<span class="variable">remaining</span>) <span class="variable">callback</span>();
+                }
+            });
+        });
+        <span class="keyword">return</span> <span class="this">this</span>;
+    } <span class="keyword">else</span> {
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">indexStream</span>(<span class="variable">id</span>, <span class="variable">fs</span>.<span class="variable">createReadStream</span>(<span class="variable">filename</span>), <span class="variable">callback</span>);
+    }
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Search the full text index. Words will be extracted from the
+search string and used to filter search results. To exclude certain
+words, prefix them with a hyphen "-".</p>
+
+<h2>Basic Search</h2>
+
+<p>   <code>index.search('foo bar', callback);</code></p>
+
+<h2>Excluding Words</h2>
+
+<p>   <code>index.search('foo -bar -cool', callback);</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  search</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">FullText</span>.<span class="variable">prototype</span>.<span class="variable">search</span> = <span class="keyword">function</span> (<span class="variable">search</span>, <span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">include</span> = [], <span class="variable">exclude</span> = [];
+    <span class="this">this</span>.<span class="variable">stemWords</span>(<span class="this">this</span>.<span class="variable">extractWords</span>(<span class="variable">search</span>)).<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">word</span>) {
+        <span class="keyword">if</span> (<span class="variable">word</span>[<span class="number integer">0</span>] === <span class="string">'-'</span>) {
+            <span class="variable">exclude</span>.<span class="variable">push</span>(<span class="variable">word</span>.<span class="variable">substr</span>(<span class="number integer">1</span>));
+        } <span class="keyword">else</span> {
+            <span class="variable">include</span>.<span class="variable">push</span>(<span class="variable">word</span>);
+        }
+    });
+    <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">_search</span>(<span class="variable">include</span>, <span class="variable">exclude</span>, <span class="variable">callback</span>);
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Clear the index.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">FullText</span>.<span class="variable">prototype</span>.<span class="variable">clear</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">keys</span>(<span class="this">this</span>.<span class="variable">key</span> + <span class="string">':*'</span>, <span class="keyword">function</span> (<span class="variable">err</span>, <span class="variable">keys</span>) {
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>, <span class="keyword">null</span>);
+        <span class="keyword">var</span> <span class="variable">rem_count</span> = <span class="number integer">0</span>, <span class="variable">failed</span> = <span class="variable">false</span>, <span class="variable">remaining</span> = <span class="variable">keys</span>.<span class="variable">length</span>;
+        <span class="variable">keys</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">key</span>) {
+            <span class="variable">self</span>.<span class="variable">client</span>.<span class="variable">del</span>(<span class="variable">key</span>, <span class="keyword">function</span> (<span class="variable">err</span>, <span class="variable">removed</span>) {
+                <span class="keyword">if</span> (<span class="variable">failed</span>) {
+                    <span class="keyword">return</span>;
+                } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">err</span>) {
+                    <span class="variable">failed</span> = <span class="variable">true</span>;
+                    <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>);
+                } <span class="keyword">else</span> {
+                    <span class="keyword">if</span> (<span class="variable">removed</span>) <span class="variable">rem_count</span>++;
+                    <span class="keyword">if</span> (!--<span class="variable">remaining</span>) <span class="variable">callback</span>(<span class="keyword">null</span>, <span class="variable">rem_count</span>);
+                }
+            });
+        });
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+}
+</code></pre>
+</td>
 </tr><tr class="filename"><td><h2 id="lib/advanced_structures/KeyPair.js"><a href="#">KeyPair</a></h2></td><td>lib/advanced_structures/KeyPair.js</td></tr><tr class="code">
 <td class="docs">
 <p>Module dependencies.
@@ -2372,7 +2586,8 @@ in the second internal hash (i.e. if values are large).</p>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Build a social graph similar to Twitter's.</p>
+<p>Build a social graph similar to Twitter's. User ID can be a string or
+integer, as long as they're unique.</p>
 
 <h2>Usage</h2>
 
@@ -3051,6 +3266,24 @@ key(s) do not already exist.</p>
 <pre><code><span class="class">Cache</span>.<span class="variable">prototype</span>.<span class="variable">ttl</span> = <span class="keyword">function</span> (<span class="variable">key</span>, <span class="variable">callback</span>) {
     <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
     <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ttl</span>(<span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">key</span>), <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Checks whether a cache key has an expiry.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Cache</span>.<span class="variable">prototype</span>.<span class="variable">isVolatile</span> = <span class="keyword">function</span> (<span class="variable">key</span>, <span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ttl</span>(<span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">key</span>), <span class="keyword">function</span> (<span class="variable">err</span>, <span class="variable">ttl</span>) {
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>, <span class="keyword">null</span>);
+        <span class="variable">callback</span>(<span class="keyword">null</span>, <span class="variable">ttl</span> != -<span class="number integer">1</span>);
+    });
     <span class="keyword">return</span> <span class="this">this</span>;
 }</code></pre>
 </td>
