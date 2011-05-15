@@ -218,6 +218,19 @@ for structures.</p>
 </tr>
 <tr class="code">
 <td class="docs">
+<p>Close the connection to Redis.</p>
+
+<ul><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">quit</span> = <span class="keyword">function</span> () {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">quit</span>();
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
 <p>Create a new Redback client.</p>
 
 <h2></h2>
@@ -524,6 +537,111 @@ for structures.</p>
         }
     }
     <span class="keyword">return</span> <span class="variable">structure</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Create a random key for temporary use.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>return</strong>: <em>string</em>  random_key</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">randomKey</span> = <span class="keyword">function</span> () {
+    <span class="keyword">return</span> <span class="class">Math</span>.<span class="variable">random</span>();
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the type of the current structure.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">type</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">type</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Rename the structure (change the Redis key).</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  new_key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">rename</span> = <span class="keyword">function</span> (<span class="variable">new_key</span>, <span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>;
+    <span class="variable">new_key</span> = <span class="this">this</span>.<span class="variable">namespaceKey</span>(<span class="variable">new_key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rename</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">new_key</span>, <span class="keyword">function</span> (<span class="variable">err</span>) {
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>, <span class="keyword">null</span>);
+        <span class="variable">self</span>.<span class="variable">key</span> = <span class="variable">new_key</span>;
+        <span class="variable">callback</span>();
+    });
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Sort all elements in the structure.</p>
+
+<h2>Options</h2>
+
+<p>   limit, offset, by, get, alpha, desc, store</p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/commands/sort</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>object</em>  options</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Structure</span>.<span class="variable">prototype</span>.<span class="variable">sort</span> = <span class="keyword">function</span> (<span class="variable">options</span>, <span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">args</span> = [<span class="this">this</span>.<span class="variable">key</span>];
+
+    <span class="comment">//SORT key [BY pattern] [LIMIT offset count]</span>
+    <span class="comment">//   [GET pattern [GET pattern ...]] [ASC|DESC] [ALPHA] [STORE destination]</span>
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">by</span> !== <span class="string">'undefined'</span>) {
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'BY'</span>, <span class="variable">options</span>.<span class="variable">by</span>);
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">limit</span> !== <span class="string">'undefined'</span>) {
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'LIMIT'</span>);
+        <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">offset</span> !== <span class="string">'undefined'</span>) {
+            <span class="variable">args</span>.<span class="variable">push</span>(<span class="variable">options</span>.<span class="variable">offset</span>);
+        }
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="variable">options</span>.<span class="variable">limit</span>);
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">get</span> !== <span class="string">'undefined'</span>) {
+        <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">options</span>.<span class="variable">get</span>)) {
+            <span class="variable">options</span>.<span class="variable">get</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">pattern</span>) {
+                <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'GET'</span>, <span class="variable">pattern</span>);
+            });
+        } <span class="keyword">else</span> {
+            <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'GET'</span>, <span class="variable">options</span>.<span class="variable">get</span>);
+        }
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">desc</span> !== <span class="string">'undefined'</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">options</span>.<span class="variable">desc</span>) {
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'DESC'</span>);
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">alpha</span> !== <span class="string">'undefined'</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">options</span>.<span class="variable">alpha</span>) {
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'ALPHA'</span>);
+    }
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span>.<span class="variable">store</span> !== <span class="string">'undefined'</span>) {
+        <span class="variable">args</span>.<span class="variable">push</span>(<span class="string">'STORE'</span>, <span class="variable">options</span>.<span class="variable">store</span>);
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sort</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">args</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
 }
 </code></pre>
 </td>
@@ -2164,7 +2282,7 @@ a basic boolean search syntax.</p>
         <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">indexAll</span>(<span class="variable">id</span>, <span class="variable">document</span>);
     } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">document</span> <span class="variable">instanceof</span> <span class="class">EventEmitter</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>;
             <span class="keyword">typeof</span> <span class="variable">document</span>.<span class="variable">readable</span> !== <span class="string">'undefined'</span> &<span class="variable">amp</span>;&<span class="variable">amp</span>; <span class="variable">document</span>.<span class="variable">readable</span> === <span class="variable">true</span>) {
-        <span class="keyword">return</span> <span class="variable">indexStream</span>(<span class="variable">id</span>, <span class="variable">document</span>, <span class="variable">callback</span>);
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">indexStream</span>(<span class="variable">id</span>, <span class="variable">document</span>, <span class="variable">callback</span>);
     } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">document</span> <span class="variable">instanceof</span> <span class="class">Buffer</span>) {
         <span class="variable">document</span> = <span class="variable">document</span>.<span class="variable">toString</span>();
     }
