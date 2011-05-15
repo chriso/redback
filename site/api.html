@@ -136,7 +136,7 @@ code .this { color: #19469D; }</style>
 </td>
 <td class="code">
 <pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>,
-                <span class="string">'FullText'</span>];</code></pre>
+                <span class="string">'FullText'</span>, <span class="string">'Queue'</span>];</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -2572,6 +2572,68 @@ in the second internal hash (i.e. if values are large).</p>
 <td class="code">
 <pre><code><span class="class">KeyPair</span>.<span class="variable">prototype</span>.<span class="variable">hashValue</span> = <span class="keyword">function</span> (<span class="variable">value</span>) {
     <span class="keyword">return</span> <span class="variable">value</span>;
+}
+</code></pre>
+</td>
+</tr><tr class="filename"><td><h2 id="lib/advanced_structures/Queue.js"><a href="#">Queue</a></h2></td><td>lib/advanced_structures/Queue.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>),
+    <span class="class">List</span> = <span class="variable">require</span>(<span class="string">'../base_structures/List'</span>).<span class="class">List</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>A simple FIFO/LIFO queue.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createQueue(key [, is_fifo]);</code></p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/topics/data-types#lists
+   http://en.wikipedia.org/wiki/Queue<em>(data</em>structure)</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)key = list(values)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Queue</span> = <span class="variable">exports</span>.<span class="class">Queue</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Add one or more elements to the queue.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Array</em>  value(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">enqueue</span> = <span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">values</span>, <span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">list</span>.<span class="variable">unshift</span>(<span class="variable">values</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Remove the next element from the queue.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - block for this many seconds</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">dequeue</span> = <span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">next</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">list</span>[<span class="this">this</span>.<span class="variable">fifo</span> ? <span class="string">'pop'</span> : <span class="string">'shift'</span>](<span class="variable">wait</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
 }
 </code></pre>
 </td>

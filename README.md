@@ -18,6 +18,7 @@ It also comes with the following advanced data structures:
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
 - **FullText** - A full text index with support for stop words, stemming and basic boolean search
+- **Queue** - A simple FIFO or LIFO queue
 
 *More coming soon!*
 
@@ -47,7 +48,7 @@ To create your own structure, use `addStructure(name, methods)`.
 Let's create a queue that can be either FIFO or LIFO
 
 ```javascript
-redback.addStructure('Queue', {
+redback.addStructure('SimpleQueue', {
     init: function (is_fifo) {
         this.fifo = is_fifo;
     },
@@ -61,11 +62,11 @@ redback.addStructure('Queue', {
 });
 ```
 
-To use the queue, call `createQueue(key, is_fifo)`
+To use the queue, call `createSimpleQueue(key, is_fifo)`
 
 ```javascript
-var queue = redback.createQueue('my_queue', true);
-queue.add('awesome!', callback);
+var queue = redback.createSimpleQueue('my_queue', true);
+queue.add('awesome!');
 ```
 
 Structures have access to a Redis key `this.key` and the Redis client
