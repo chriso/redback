@@ -31,7 +31,7 @@ var user3 = redback.createSocialGraph(3);
 user3.follow(1, callback);
 
 var text = redback.createFullText('my_index');
-text.indexFile({1: 'file1.txt, 2: 'file2.txt}, callback);
+text.indexFile({1: 'file1.txt', 2: 'file2.txt'}, callback);
 text.search('foo bar -exclude -these -words', callback);
 
 var user1 = redback.createHash('user1');
