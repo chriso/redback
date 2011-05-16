@@ -1137,11 +1137,23 @@ for structures.</p>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Get and remove the first element in the list.</p>
+<p>Get and remove the last element in the list. The first param can be used
+to block the process and wait until list elements are available. If the list
+is empty in both examples below, the first example will return <code>null</code>, while
+the second will wait for up to 3 seconds. If a list element becomes available
+during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
+
+<h2>Example</h2>
+
+<p>   <code>list.shift(callback);</code></p>
+
+<h2>Blocking Example</h2>
+
+<p>   <code>list.shift(3, callback)</code></p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>bool</em>  wait (optional) - seconds to block while waiting</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
 <pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">shift</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
@@ -1157,11 +1169,23 @@ for structures.</p>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Get and remove the last element in the list.</p>
+<p>Get and remove the last element in the list. The first param can be used
+to block the process and wait until list elements are available. If the list
+is empty in both examples below, the first example will return <code>null</code>, while
+the second will wait for up to 3 seconds. If a list element becomes available
+during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
+
+<h2>Example</h2>
+
+<p>   <code>list.pop(callback);</code></p>
+
+<h2>Blocking Example</h2>
+
+<p>   <code>list.pop(3, callback)</code></p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>bool</em>  wait (optional) - seconds to block while waiting</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
 <pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">pop</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
@@ -2793,14 +2817,18 @@ integer, as long as they're unique.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>int | SocialGraph | Array</em>  user(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>int | SocialGraph | Array</em>  user(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
 <pre><code><span class="class">SocialGraph</span>.<span class="variable">prototype</span>.<span class="variable">follow</span> = <span class="keyword">function</span> (<span class="variable">users</span>, <span class="variable">callback</span>) {
     <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>,
         <span class="variable">users</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>, <span class="string">'id'</span>),
         <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>();
-    <span class="variable">callback</span> = <span class="variable">users</span>.<span class="variable">pop</span>();
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">users</span>[<span class="variable">users</span>.<span class="variable">length</span>-<span class="number integer">1</span>] === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">users</span>.<span class="variable">pop</span>();
+    } <span class="keyword">else</span> {
+        <span class="variable">callback</span> = <span class="keyword">function</span> () {};
+    }
     <span class="variable">users</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">user</span>) {
         <span class="variable">multi</span>.<span class="variable">sadd</span>(<span class="variable">self</span>.<span class="variable">key_prefix</span> + <span class="variable">user</span> + <span class="string">':followers'</span>, <span class="variable">self</span>.<span class="variable">id</span>);
         <span class="variable">multi</span>.<span class="variable">sadd</span>(<span class="variable">self</span>.<span class="variable">following</span>, <span class="variable">user</span>);
@@ -2816,14 +2844,18 @@ integer, as long as they're unique.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>int | SocialGraph | Array</em>  user(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>int | SocialGraph | Array</em>  user(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
 <pre><code><span class="class">SocialGraph</span>.<span class="variable">prototype</span>.<span class="variable">unfollow</span> = <span class="keyword">function</span> (<span class="variable">users</span>, <span class="variable">callback</span>) {
     <span class="keyword">var</span> <span class="variable">self</span> = <span class="this">this</span>,
         <span class="variable">users</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>, <span class="string">'id'</span>),
         <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>();
-    <span class="variable">callback</span> = <span class="variable">users</span>.<span class="variable">pop</span>();
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">users</span>[<span class="variable">users</span>.<span class="variable">length</span>-<span class="number integer">1</span>] === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">users</span>.<span class="variable">pop</span>();
+    } <span class="keyword">else</span> {
+        <span class="variable">callback</span> = <span class="keyword">function</span> () {};
+    }
     <span class="variable">users</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">user</span>) {
         <span class="variable">multi</span>.<span class="variable">srem</span>(<span class="variable">self</span>.<span class="variable">key_prefix</span> + <span class="variable">user</span> + <span class="string">':followers'</span>, <span class="variable">self</span>.<span class="variable">id</span>);
         <span class="variable">multi</span>.<span class="variable">srem</span>(<span class="variable">self</span>.<span class="variable">following</span>, <span class="variable">user</span>);
