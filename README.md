@@ -19,6 +19,7 @@ It also comes with the following advanced data structures:
 - **CappedList** - A list with a fixed length
 - **FullText** - A full text index with support for stop words, stemming and basic boolean search
 - **Queue** - A simple FIFO or LIFO queue
+- **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting
 
 *More coming soon!*
 
