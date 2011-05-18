@@ -136,7 +136,7 @@ code .this { color: #19469D; }</style>
 </td>
 <td class="code">
 <pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>,
-                <span class="string">'FullText'</span>, <span class="string">'Queue'</span>];</code></pre>
+                <span class="string">'FullText'</span>, <span class="string">'Queue'</span>, <span class="string">'RateLimit'</span>];</code></pre>
 </td>
 </tr>
 <tr class="code">
@@ -2775,6 +2775,125 @@ in the second internal hash (i.e. if values are large).</p>
 <td class="code">
 <pre><code><span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">dequeue</span> = <span class="class">Queue</span>.<span class="variable">prototype</span>.<span class="variable">next</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
     <span class="this">this</span>.<span class="variable">list</span>[<span class="this">this</span>.<span class="variable">fifo</span> ? <span class="string">'pop'</span> : <span class="string">'shift'</span>](<span class="variable">wait</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}
+</code></pre>
+</td>
+</tr><tr class="filename"><td><h2 id="lib/advanced_structures/RateLimit.js"><a href="#">RateLimit</a></h2></td><td>lib/advanced_structures/RateLimit.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>See http://chris6f.com/rate-limiting-with-redis</p>
+
+<p>Count the number of times a subject performs an action over an interval
+in the immediate past - this can be used to rate limit the subject if
+the count goes over a certain threshold. For example, you could track
+how many times an IP (the subject) has viewed a page (the action) over
+a certain time frame and limit them accordingly.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createRateLimit(action [, options]);</code></p>
+
+<h2>Options</h2>
+
+<p>   <code>bucket_interval</code> - default is 5 seconds
+   <code>bucket_span</code>     - default is 10 minutes
+   <code>subject_expiry</code>  - default is 20 minutes</p>
+
+<h2>Reference</h2>
+
+<p>   http://chris6f.com/rate-limiting-with-redis
+   http://redis.io/topics/data-types#hash</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)action:&lt;subject1&gt; = hash(bucket =&gt; count)</code>
+   <code>(namespace:)action:&lt;subject2&gt; = hash(bucket =&gt; count)</code>
+   <code>(namespace:)action:&lt;subjectN&gt; = hash(bucket =&gt; count)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">RateLimit</span> = <span class="variable">exports</span>.<span class="class">RateLimit</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Increment the count for the specified subject.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Array</em>  subject(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">RateLimit</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">subject</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">subject</span>)) {
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">addAll</span>(<span class="variable">subject</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">var</span> <span class="variable">bucket</span> = <span class="this">this</span>.<span class="variable">getBucket</span>(), <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>();
+    <span class="variable">subject</span> = <span class="this">this</span>.<span class="variable">key</span> + <span class="string">':'</span> + <span class="variable">subject</span>;
+
+    <span class="comment">//Increment the current bucket</span>
+    <span class="variable">multi</span>.<span class="variable">hincrby</span>(<span class="variable">subject</span>, <span class="variable">bucket</span>, <span class="number integer">1</span>)
+
+    <span class="comment">//Clear the buckets ahead</span>
+    <span class="variable">multi</span>.<span class="variable">hdel</span>(<span class="variable">subject</span>, (<span class="variable">bucket</span> + <span class="number integer">1</span>) % <span class="this">this</span>.<span class="variable">bucket_count</span>)
+         .<span class="variable">hdel</span>(<span class="variable">subject</span>, (<span class="variable">bucket</span> + <span class="number integer">2</span>) % <span class="this">this</span>.<span class="variable">bucket_count</span>)
+
+    <span class="comment">//Renew the key TTL</span>
+    <span class="variable">multi</span>.<span class="variable">expire</span>(<span class="variable">subject</span>, <span class="this">this</span>.<span class="variable">subject_expiry</span>);
+
+    <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="keyword">function</span> (<span class="variable">err</span>) {
+        <span class="keyword">if</span> (!<span class="variable">callback</span>) <span class="keyword">return</span>;
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>);
+        <span class="variable">callback</span>(<span class="keyword">null</span>);
+    });
+
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Count the number of times the subject has performed an action
+in the last <code>interval</code> seconds.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  subject</p></li><li><p><strong>param</strong>: <em>int</em>  interval</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">RateLimit</span>.<span class="variable">prototype</span>.<span class="variable">count</span> = <span class="keyword">function</span> (<span class="variable">subject</span>, <span class="variable">interval</span>, <span class="variable">callback</span>) {
+    <span class="keyword">var</span> <span class="variable">bucket</span> = <span class="this">this</span>.<span class="variable">getBucket</span>(),
+        <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>(),
+        <span class="variable">count</span> = <span class="class">Math</span>.<span class="variable">floor</span>(<span class="variable">interval</span> / <span class="this">this</span>.<span class="variable">bucket_interval</span>);
+
+    <span class="variable">subject</span> = <span class="this">this</span>.<span class="variable">key</span> + <span class="string">':'</span> + <span class="variable">subject</span>;
+
+    <span class="comment">//Get the counts from the previous `count` buckets</span>
+    <span class="variable">multi</span>.<span class="variable">hget</span>(<span class="variable">subject</span>, <span class="variable">bucket</span>);
+    <span class="keyword">while</span> (<span class="variable">count</span>--) {
+        <span class="variable">multi</span>.<span class="variable">hget</span>(<span class="variable">subject</span>, (--<span class="variable">bucket</span> + <span class="this">this</span>.<span class="variable">bucket_count</span>) % <span class="this">this</span>.<span class="variable">bucket_count</span>);
+    }
+
+    <span class="comment">//Add up the counts from each bucket</span>
+    <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="keyword">function</span> (<span class="variable">err</span>, <span class="variable">counts</span>) {
+        <span class="keyword">if</span> (<span class="variable">err</span>) <span class="keyword">return</span> <span class="variable">callback</span>(<span class="variable">err</span>, <span class="keyword">null</span>);
+        <span class="keyword">for</span> (<span class="keyword">var</span> <span class="variable">count</span> = <span class="variable">i</span> = <span class="number integer">0</span>, <span class="variable">l</span> = <span class="variable">counts</span>.<span class="variable">length</span>; <span class="variable">i</span> &<span class="variable">lt</span>; <span class="variable">l</span>; <span class="variable">i</span>++) {
+            <span class="keyword">if</span> (<span class="variable">counts</span>[<span class="variable">i</span>]) {
+                <span class="variable">count</span> += <span class="variable">parseInt</span>(<span class="variable">counts</span>[<span class="variable">i</span>], <span class="number integer">10</span>);
+            }
+        }
+        <span class="variable">callback</span>(<span class="keyword">null</span>, <span class="variable">count</span>);
+    });
+
     <span class="keyword">return</span> <span class="this">this</span>;
 }
 </code></pre>
