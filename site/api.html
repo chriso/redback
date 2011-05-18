@@ -108,188 +108,7 @@ code .this { color: #19469D; }</style>
 		</script>
 	</head>
 	<body>
-<table id="source"><tbody><tr><td><h1>Redback</h1><p>A high-level <strong>Redis</strong> library for <strong>Node.JS</strong></p></td><td></td></tr><tr class="filename"><td><h2 id="lib/Redback.js"><a href="#">Redback</a></h2></td><td>lib/Redback.js</td></tr><tr class="code">
-<td class="docs">
-<p>Module dependencies.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">redis</span> = <span class="variable">require</span>(<span class="string">'redis'</span>),
-    <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'./Structure'</span>),
-    <span class="class">Channel</span> = <span class="variable">require</span>(<span class="string">'./Channel'</span>).<span class="class">Channel</span>,
-    <span class="class">Cache</span> = <span class="variable">require</span>(<span class="string">'./Cache'</span>).<span class="class">Cache</span>;</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Define the available Redis structures.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">base</span> = [<span class="string">'Hash'</span>,<span class="string">'List'</span>,<span class="string">'Set'</span>,<span class="string">'SortedSet'</span>,<span class="string">'Bitfield'</span>];</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Define the available advanced structures.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>,
-                <span class="string">'FullText'</span>, <span class="string">'Queue'</span>, <span class="string">'RateLimit'</span>];</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>The Redback object wraps the Redis client and acts as a factory
-for structures.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  host (optional)</p></li><li><p><strong>param</strong>: <em>int</em>  port (optional)</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Redback</span> = <span class="variable">exports</span>.<span class="class">Redback</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
-    <span class="this">this</span>.<span class="variable">client</span> = <span class="variable">redis</span>.<span class="variable">createClient</span>.<span class="variable">apply</span>(<span class="this">this</span>, <span class="variable">arguments</span>);
-    <span class="this">this</span>.<span class="variable">namespace</span> = <span class="string">''</span>;
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span> === <span class="string">'object'</span>) {
-        <span class="this">this</span>.<span class="variable">namespace</span> = <span class="variable">options</span>.<span class="variable">namespace</span> || <span class="string">''</span>;
-    }
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Create a new Cache.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  namespace (optional)</p></li><li><p><strong>return</strong>: <em>Cache</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">createCache</span> = <span class="keyword">function</span> (<span class="variable">namespace</span>) {
-    <span class="variable">namespace</span> = <span class="variable">namespace</span> || <span class="string">'cache'</span>;
-    <span class="keyword">if</span> (<span class="this">this</span>.<span class="variable">namespace</span>.<span class="variable">length</span>) {
-        <span class="variable">namespace</span> = <span class="this">this</span>.<span class="variable">namespace</span> + <span class="string">':'</span> + <span class="variable">namespace</span>;
-    }
-    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Cache</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">namespace</span>);
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Create a new Channel.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  channel - the channel name</p></li><li><p><strong>return</strong>: <em>Channel</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">createChannel</span> = <span class="keyword">function</span> (<span class="variable">channel</span>) {
-    <span class="keyword">if</span> (!<span class="variable">channel</span>) {
-        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(<span class="string">'A channel key is required'</span>);
-    }
-    <span class="keyword">if</span> (<span class="this">this</span>.<span class="variable">namespace</span>.<span class="variable">length</span>) {
-        <span class="variable">channel</span> = <span class="this">this</span>.<span class="variable">namespace</span> + <span class="string">':'</span> + <span class="variable">channel</span>;
-    }
-    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Channel</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">channel</span>);
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Send a (BG)SAVE command to Redis.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  background (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">save</span> = <span class="keyword">function</span> (<span class="variable">background</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">background</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">background</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">save</span>(<span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">bgsave</span>(<span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Close the connection to Redis.</p>
-
-<ul><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">quit</span> = <span class="keyword">function</span> () {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">quit</span>();
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Create a new Redback client.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  host (optional)</p></li><li><p><strong>param</strong>: <em>int</em>  port (optional)</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="variable">exports</span>.<span class="variable">createClient</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
-    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Redback</span>(<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>);
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Add the Redis structures from ./base_structures
- </p>
-</td>
-<td class="code">
-<pre><code><span class="variable">base</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">structure</span>) {
-    <span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">addStructure</span>(<span class="variable">structure</span>,
-        <span class="variable">require</span>(<span class="string">'./base_structures/'</span> + <span class="variable">structure</span>)[<span class="variable">structure</span>]);
-});</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Add the advanced structures from ./advanced_structures
- </p>
-</td>
-<td class="code">
-<pre><code><span class="variable">advanced</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">structure</span>) {
-    <span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">addStructure</span>(<span class="variable">structure</span>,
-        <span class="variable">require</span>(<span class="string">'./advanced_structures/'</span> + <span class="variable">structure</span>)[<span class="variable">structure</span>]);
-});</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Redis constants.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="class">INF</span>  = <span class="variable">exports</span>.<span class="class">INF</span> = <span class="string">'+inf'</span>;
-<span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="class">NINF</span> = <span class="variable">exports</span>.<span class="class">NINF</span> = <span class="string">'-inf'</span>;</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Export prototypes so that they can be extended.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="variable">exports</span>.<span class="class">Client</span> = <span class="variable">redis</span>.<span class="class">RedisClient</span>;
-<span class="variable">exports</span>.<span class="class">Structure</span> = <span class="class">Structure</span>.<span class="class">Structure</span>;
-<span class="variable">exports</span>.<span class="class">Cache</span> = <span class="class">Cache</span>;
-<span class="variable">exports</span>.<span class="class">Channel</span> = <span class="class">Channel</span>;
-</code></pre>
-</td>
-</tr><tr class="filename"><td><h2 id="lib/Structure.js"><a href="#">Structure</a></h2></td><td>lib/Structure.js</td></tr><tr class="code">
+<table id="source"><tbody><tr><td><h1>Redback</h1><p>A high-level <strong>Redis</strong> library for <strong>Node.JS</strong></p></td><td></td></tr><tr class="filename"><td><h2 id="lib/Structure.js"><a href="#">Structure</a></h2></td><td>lib/Structure.js</td></tr><tr class="code">
 <td class="docs">
 <p>All Redback structures inherit from this.
  </p>
@@ -707,134 +526,109 @@ for structures.</p>
 }
 </code></pre>
 </td>
-</tr><tr class="filename"><td><h2 id="lib/base_structures/Hash.js"><a href="#">Hash</a></h2></td><td>lib/base_structures/Hash.js</td></tr><tr class="code">
+</tr><tr class="filename"><td><h2 id="lib/Redback.js"><a href="#">Redback</a></h2></td><td>lib/Redback.js</td></tr><tr class="code">
 <td class="docs">
 <p>Module dependencies.
  </p>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
+<pre><code><span class="keyword">var</span> <span class="variable">redis</span> = <span class="variable">require</span>(<span class="string">'redis'</span>),
+    <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'./Structure'</span>),
+    <span class="class">Channel</span> = <span class="variable">require</span>(<span class="string">'./Channel'</span>).<span class="class">Channel</span>,
+    <span class="class">Cache</span> = <span class="variable">require</span>(<span class="string">'./Cache'</span>).<span class="class">Cache</span>;</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>A wrapper for the Redis hash type.</p>
-
-<h2>Usage</h2>
-
-<p>   <code>redback.createHash(key);</code></p>
-
-<h2>Reference</h2>
-
-<p>   http://redis.io/topics/data-types#hashes</p>
-
-<h2>Redis Structure</h2>
-
-<p>   <code>(namespace:)key = hash(key =&gt; value)</code>
+<p>Define the available Redis structures.
  </p>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Hash</span> = <span class="variable">exports</span>.<span class="class">Hash</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+<pre><code><span class="keyword">var</span> <span class="variable">base</span> = [<span class="string">'Hash'</span>,<span class="string">'List'</span>,<span class="string">'Set'</span>,<span class="string">'SortedSet'</span>,<span class="string">'Bitfield'</span>];</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Get an array of hash keys.</p>
+<p>Define the available advanced structures.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="variable">advanced</span> = [<span class="string">'KeyPair'</span>,<span class="string">'DensitySet'</span>,<span class="string">'CappedList'</span>,<span class="string">'SocialGraph'</span>,
+                <span class="string">'FullText'</span>, <span class="string">'Queue'</span>, <span class="string">'RateLimit'</span>];</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>The Redback object wraps the Redis client and acts as a factory
+for structures.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>string</em>  host (optional)</p></li><li><p><strong>param</strong>: <em>int</em>  port (optional)</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">keys</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hkeys</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
+<pre><code><span class="keyword">var</span> <span class="class">Redback</span> = <span class="variable">exports</span>.<span class="class">Redback</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
+    <span class="this">this</span>.<span class="variable">client</span> = <span class="variable">redis</span>.<span class="variable">createClient</span>.<span class="variable">apply</span>(<span class="this">this</span>, <span class="variable">arguments</span>);
+    <span class="this">this</span>.<span class="variable">namespace</span> = <span class="string">''</span>;
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span> === <span class="string">'object'</span>) {
+        <span class="this">this</span>.<span class="variable">namespace</span> = <span class="variable">options</span>.<span class="variable">namespace</span> || <span class="string">''</span>;
+    }
 }</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Get an array of hash values.</p>
+<p>Create a new Cache.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>string</em>  namespace (optional)</p></li><li><p><strong>return</strong>: <em>Cache</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">values</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hvals</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">createCache</span> = <span class="keyword">function</span> (<span class="variable">namespace</span>) {
+    <span class="variable">namespace</span> = <span class="variable">namespace</span> || <span class="string">'cache'</span>;
+    <span class="keyword">if</span> (<span class="this">this</span>.<span class="variable">namespace</span>.<span class="variable">length</span>) {
+        <span class="variable">namespace</span> = <span class="this">this</span>.<span class="variable">namespace</span> + <span class="string">':'</span> + <span class="variable">namespace</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Cache</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">namespace</span>);
 }</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Get the number of hash keys.</p>
+<p>Create a new Channel.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>string</em>  channel - the channel name</p></li><li><p><strong>return</strong>: <em>Channel</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hlen</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">createChannel</span> = <span class="keyword">function</span> (<span class="variable">channel</span>) {
+    <span class="keyword">if</span> (!<span class="variable">channel</span>) {
+        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="class">Error</span>(<span class="string">'A channel key is required'</span>);
+    }
+    <span class="keyword">if</span> (<span class="this">this</span>.<span class="variable">namespace</span>.<span class="variable">length</span>) {
+        <span class="variable">channel</span> = <span class="this">this</span>.<span class="variable">namespace</span> + <span class="string">':'</span> + <span class="variable">channel</span>;
+    }
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Channel</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">channel</span>);
 }</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Delete a hash key.</p>
+<p>Send a (BG)SAVE command to Redis.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>string</em>  background (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="keyword">delete</span> = <span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">del</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hdel</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Checks whether a hash key exists.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">exists</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hexists</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Sets one or more key/value pairs.</p>
-
-<p>To set one key/value pair:
-   <code>hash.set('foo', 'bar', callback);</code></p>
-
-<p>To set multiple:
-   <code>hash.set({key1:'value1', key2:'value2}, callback);</code></p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Object</em>  hash_key</p></li><li><p><strong>param</strong>: <em>string</em>  value (optional)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">set</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">hash_key</span> === <span class="string">'object'</span>) {
-        <span class="variable">callback</span> = <span class="variable">value</span> || <span class="keyword">function</span> () {};
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hmset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">save</span> = <span class="keyword">function</span> (<span class="variable">background</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">background</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">background</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">save</span>(<span class="variable">callback</span>);
     } <span class="keyword">else</span> {
-        <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">bgsave</span>(<span class="variable">callback</span>);
     }
     <span class="keyword">return</span> <span class="this">this</span>;
 }</code></pre>
@@ -842,689 +636,76 @@ for structures.</p>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Sets a key/value pair if the key doesn't already exist.</p>
+<p>Close the connection to Redis.</p>
 
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hsetnx</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">quit</span> = <span class="keyword">function</span> () {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">quit</span>();
     <span class="keyword">return</span> <span class="this">this</span>;
 }</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Gets one or more key/value pairs.</p>
-
-<p>To get all key/value pairs in the hash:
-   <code>hash.get('foo', callback);</code></p>
-
-<p>To get certain key/value pairs:
-   <code>hash.get(['foo','bar'], callback);</code>
-   <code>hash.get('foo', callback);</code></p>
+<p>Create a new Redback client.</p>
 
 <h2></h2>
 
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key (optional)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<ul><li><p><strong>param</strong>: <em>string</em>  host (optional)</p></li><li><p><strong>param</strong>: <em>int</em>  port (optional)</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">get</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">hash_key</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">hash_key</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hgetall</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">hash_key</span>)) {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hmget</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>)
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hget</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
+<pre><code><span class="variable">exports</span>.<span class="variable">createClient</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Redback</span>(<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>);
 }</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Increment the specified hash value.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>int</em>  amount (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<p>Add the Redis structures from ./base_structures
+ </p>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">increment</span> =
-<span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">incrBy</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">amount</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">amount</span>;
-        <span class="variable">amount</span> = <span class="number integer">1</span>;
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hincrby</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
+<pre><code><span class="variable">base</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">structure</span>) {
+    <span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">addStructure</span>(<span class="variable">structure</span>,
+        <span class="variable">require</span>(<span class="string">'./base_structures/'</span> + <span class="variable">structure</span>)[<span class="variable">structure</span>]);
+});</code></pre>
 </td>
 </tr>
 <tr class="code">
 <td class="docs">
-<p>Decrement the specified hash value.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>int</em>  amount (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+<p>Add the advanced structures from ./advanced_structures
+ </p>
 </td>
 <td class="code">
-<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">decrement</span> =
-<span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">decrBy</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">amount</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">amount</span>;
-        <span class="variable">amount</span> = <span class="number integer">1</span>;
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hincrby</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, -<span class="number integer">1</span> * <span class="variable">amount</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}
+<pre><code><span class="variable">advanced</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">structure</span>) {
+    <span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="variable">addStructure</span>(<span class="variable">structure</span>,
+        <span class="variable">require</span>(<span class="string">'./advanced_structures/'</span> + <span class="variable">structure</span>)[<span class="variable">structure</span>]);
+});</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Redis constants.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="class">INF</span>  = <span class="variable">exports</span>.<span class="class">INF</span> = <span class="string">'+inf'</span>;
+<span class="class">Redback</span>.<span class="variable">prototype</span>.<span class="class">NINF</span> = <span class="variable">exports</span>.<span class="class">NINF</span> = <span class="string">'-inf'</span>;</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Export prototypes so that they can be extended.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="variable">exports</span>.<span class="class">Client</span> = <span class="variable">redis</span>.<span class="class">RedisClient</span>;
+<span class="variable">exports</span>.<span class="class">Structure</span> = <span class="class">Structure</span>.<span class="class">Structure</span>;
+<span class="variable">exports</span>.<span class="class">Cache</span> = <span class="class">Cache</span>;
+<span class="variable">exports</span>.<span class="class">Channel</span> = <span class="class">Channel</span>;
 </code></pre>
-</td>
-</tr><tr class="filename"><td><h2 id="lib/base_structures/List.js"><a href="#">List</a></h2></td><td>lib/base_structures/List.js</td></tr><tr class="code">
-<td class="docs">
-<p>Module dependencies.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>A wrapper for the Redis list type.</p>
-
-<h2>Usage</h2>
-
-<p>   <code>redback.createList(key);</code></p>
-
-<h2>Reference</h2>
-
-<p>   http://redis.io/topics/data-types#lists</p>
-
-<h2>Redis Structure</h2>
-
-<p>   <code>(namespace:)key = list(values)</code>
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">List</span> = <span class="variable">exports</span>.<span class="class">List</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the list as an array.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">values</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="number integer">0</span>, -<span class="number integer">1</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get a range of list elements.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  start</p></li><li><p><strong>param</strong>: <em>count</em>  end (optional - defaults to the last element)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">range</span> = <span class="keyword">function</span> (<span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">end</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">end</span>;
-        <span class="variable">end</span> = -<span class="number integer">1</span>;
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get one or more elements starting at the specified index.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  index</p></li><li><p><strong>param</strong>: <em>count</em>  count (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">get</span> = <span class="keyword">function</span> (<span class="variable">index</span>, <span class="variable">count</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">count</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">count</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lindex</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">index</span> + <span class="variable">count</span> - <span class="number integer">1</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Cap the length of the list.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  length</p></li><li><p><strong>param</strong>: <em>bool</em>  keep_earliest (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">cap</span> = <span class="keyword">function</span> (<span class="variable">length</span>, <span class="variable">keep_earliest</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">var</span> <span class="variable">start</span> = <span class="number integer">0</span>, <span class="variable">end</span> = -<span class="number integer">1</span>;
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">keep_earliest</span> === <span class="string">'function'</span>) {
-        <span class="comment">//Keep the last `length` elements</span>
-        <span class="variable">start</span> = -<span class="number integer">1</span> * <span class="variable">length</span>;
-        <span class="variable">callback</span> = <span class="variable">keep_earliest</span>;
-    } <span class="keyword">else</span> {
-        <span class="comment">//Keep the first `length` elements</span>
-        <span class="variable">end</span> = <span class="variable">length</span> - <span class="number integer">1</span>;
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ltrim</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Remove one or more list elements matching the value.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>bool</em>  count (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">remove</span> = <span class="keyword">function</span> (<span class="variable">value</span>, <span class="variable">count</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">count</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">count</span>;
-        <span class="variable">count</span> = <span class="number integer">1</span>;
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrem</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">count</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Trim a list to the specified bounds.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  start</p></li><li><p><strong>param</strong>: <em>int</em>  end</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">trim</span> = <span class="keyword">function</span> (<span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ltrim</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Insert an element before the specified pivot.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  pivot</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">insertBefore</span> = <span class="keyword">function</span> (<span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">linsert</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="string">'BEFORE'</span>, <span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Insert an element after the specified pivot.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  pivot</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">insertAfter</span> = <span class="keyword">function</span> (<span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">linsert</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="string">'AFTER'</span>, <span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Set the element at the specified index.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  index</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">set</span> = <span class="keyword">function</span> (<span class="variable">index</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the number of elements in the list.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">llen</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get and remove the last element in the list. The first param can be used
-to block the process and wait until list elements are available. If the list
-is empty in both examples below, the first example will return <code>null</code>, while
-the second will wait for up to 3 seconds. If a list element becomes available
-during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
-
-<h2>Example</h2>
-
-<p>   <code>list.shift(callback);</code></p>
-
-<h2>Blocking Example</h2>
-
-<p>   <code>list.shift(3, callback)</code></p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">shift</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">wait</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">blpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get and remove the last element in the list. The first param can be used
-to block the process and wait until list elements are available. If the list
-is empty in both examples below, the first example will return <code>null</code>, while
-the second will wait for up to 3 seconds. If a list element becomes available
-during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
-
-<h2>Example</h2>
-
-<p>   <code>list.pop(callback);</code></p>
-
-<h2>Blocking Example</h2>
-
-<p>   <code>list.pop(3, callback)</code></p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">pop</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">wait</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">brpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Add one or more elements to the start of the list.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | array</em>  value(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">unshift</span> = <span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">lpush</span> = <span class="keyword">function</span> (<span class="variable">values</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">values</span>)) {
-        <span class="keyword">var</span> <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>(), <span class="variable">key</span> = <span class="this">this</span>.<span class="variable">key</span>;
-        <span class="variable">values</span>.<span class="variable">reverse</span>().<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">value</span>) {
-            <span class="variable">multi</span>.<span class="variable">lpush</span>(<span class="variable">key</span>, <span class="variable">value</span>);
-        });
-        <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">values</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Add one or more elements to the end of the list.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | array</em>  value(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">push</span> = <span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">values</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">values</span>)) {
-        <span class="keyword">var</span> <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>(), <span class="variable">key</span> = <span class="this">this</span>.<span class="variable">key</span>;
-        <span class="variable">values</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">value</span>) {
-            <span class="variable">multi</span>.<span class="variable">rpush</span>(<span class="variable">key</span>, <span class="variable">value</span>);
-        });
-        <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">values</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Remove the last element of the list and add it to the start
-of another list.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>String | List</em>  list</p></li><li><p><strong>param</strong>: <em>bool</em>  wait (optional) - seconds to block while waiting</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">popShift</span> = <span class="keyword">function</span> (<span class="variable">list</span>, <span class="variable">wait</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="variable">list</span> = <span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">list</span>);
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">wait</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpoplpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">list</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">brpoplpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">list</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}
-</code></pre>
-</td>
-</tr><tr class="filename"><td><h2 id="lib/base_structures/Set.js"><a href="#">Set</a></h2></td><td>lib/base_structures/Set.js</td></tr><tr class="code">
-<td class="docs">
-<p>Module dependencies.
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>A wrapper for the Redis set type.</p>
-
-<h2>Usage</h2>
-
-<p>   <code>redback.createSet(key);</code></p>
-
-<h2>Reference</h2>
-
-<p>   http://redis.io/topics/data-types#sets</p>
-
-<h2>Redis Structure</h2>
-
-<p>   <code>(namespace:)key = set(elements)</code>
- </p>
-</td>
-<td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Set</span> = <span class="variable">exports</span>.<span class="class">Set</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Add one or more elements to the set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Array</em>  element(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">element</span>)) {
-        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">addAll</span>(<span class="variable">element</span>, <span class="variable">callback</span>);
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sadd</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Remove one or more elements from the set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Array</em>  element(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">remove</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">element</span>)) {
-        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">removeAll</span>(<span class="variable">element</span>, <span class="variable">callback</span>);
-    }
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">srem</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get an array of elements in the set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">elements</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">members</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">smembers</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Move an element to another set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string</em>  element</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">move</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">element</span>, <span class="variable">callback</span>) {
-    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">smove</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">dest</span>), <span class="variable">element</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Check whether an element exists in the set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string</em>  element</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">exists</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">contains</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sismember</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the length (cardinality) of the set.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">cardinality</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">scard</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get a random element from the set and optionally remove it.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>bool</em>  remove (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">random</span> = <span class="keyword">function</span> (<span class="variable">remove</span>, <span class="variable">callback</span>) {
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">remove</span> === <span class="string">'function'</span>) {
-        <span class="variable">callback</span> = <span class="variable">remove</span>;
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">srandmember</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    } <span class="keyword">else</span> {
-        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">spop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
-    }
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the intersection of one or more sets.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">inter</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sinter</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the intersection of one or more sets and store it another
-set (dest).</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">interStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sinterstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the union of one or more sets.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">union</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sunion</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the union of one or more sets and store it another
-set (dest).</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">unionStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sunionstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the difference of one or more sets.</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">diff</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sdiff</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
-</td>
-</tr>
-<tr class="code">
-<td class="docs">
-<p>Get the difference of one or more sets and store it another
-set (dest).</p>
-
-<h2></h2>
-
-<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
-</td>
-<td class="code">
-<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">diffStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
-    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
-    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
-    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
-    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sdiffstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
-    <span class="keyword">return</span> <span class="this">this</span>;
-}</code></pre>
 </td>
 </tr><tr class="filename"><td><h2 id="lib/base_structures/SortedSet.js"><a href="#">SortedSet</a></h2></td><td>lib/base_structures/SortedSet.js</td></tr><tr class="code">
 <td class="docs">
@@ -2804,8 +1985,8 @@ a certain time frame and limit them accordingly.</p>
 
 <h2>Options</h2>
 
-<p>   <code>bucket_interval</code> - default is 5 seconds
-   <code>bucket_span</code>     - default is 10 minutes
+<p>   <code>bucket_interval</code> - default is 5 seconds<br />
+   <code>bucket_span</code>     - default is 10 minutes<br />
    <code>subject_expiry</code>  - default is 20 minutes</p>
 
 <h2>Reference</h2>
@@ -3634,6 +2815,825 @@ key(s) do not already exist.</p>
     <span class="keyword">return</span> <span class="this">this</span>;
 }
 </code></pre>
+</td>
+</tr><tr class="filename"><td><h2 id="lib/base_structures/List.js"><a href="#">List</a></h2></td><td>lib/base_structures/List.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>A wrapper for the Redis list type.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createList(key);</code></p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/topics/data-types#lists</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)key = list(values)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">List</span> = <span class="variable">exports</span>.<span class="class">List</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the list as an array.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">values</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="number integer">0</span>, -<span class="number integer">1</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get a range of list elements.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  start</p></li><li><p><strong>param</strong>: <em>count</em>  end (optional - defaults to the last element)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">range</span> = <span class="keyword">function</span> (<span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">end</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">end</span>;
+        <span class="variable">end</span> = -<span class="number integer">1</span>;
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get one or more elements starting at the specified index.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  index</p></li><li><p><strong>param</strong>: <em>count</em>  count (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">get</span> = <span class="keyword">function</span> (<span class="variable">index</span>, <span class="variable">count</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">count</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">count</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lindex</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrange</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">index</span> + <span class="variable">count</span> - <span class="number integer">1</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Cap the length of the list.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  length</p></li><li><p><strong>param</strong>: <em>bool</em>  keep_earliest (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">cap</span> = <span class="keyword">function</span> (<span class="variable">length</span>, <span class="variable">keep_earliest</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">var</span> <span class="variable">start</span> = <span class="number integer">0</span>, <span class="variable">end</span> = -<span class="number integer">1</span>;
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">keep_earliest</span> === <span class="string">'function'</span>) {
+        <span class="comment">//Keep the last `length` elements</span>
+        <span class="variable">start</span> = -<span class="number integer">1</span> * <span class="variable">length</span>;
+        <span class="variable">callback</span> = <span class="variable">keep_earliest</span>;
+    } <span class="keyword">else</span> {
+        <span class="comment">//Keep the first `length` elements</span>
+        <span class="variable">end</span> = <span class="variable">length</span> - <span class="number integer">1</span>;
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ltrim</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Remove one or more list elements matching the value.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>bool</em>  count (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">remove</span> = <span class="keyword">function</span> (<span class="variable">value</span>, <span class="variable">count</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">count</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">count</span>;
+        <span class="variable">count</span> = <span class="number integer">1</span>;
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lrem</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">count</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Trim a list to the specified bounds.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  start</p></li><li><p><strong>param</strong>: <em>int</em>  end</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">trim</span> = <span class="keyword">function</span> (<span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">ltrim</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">start</span>, <span class="variable">end</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Insert an element before the specified pivot.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  pivot</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">insertBefore</span> = <span class="keyword">function</span> (<span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">linsert</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="string">'BEFORE'</span>, <span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Insert an element after the specified pivot.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  pivot</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">insertAfter</span> = <span class="keyword">function</span> (<span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">linsert</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="string">'AFTER'</span>, <span class="variable">pivot</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Set the element at the specified index.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  index</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">set</span> = <span class="keyword">function</span> (<span class="variable">index</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">index</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the number of elements in the list.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">llen</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get and remove the last element in the list. The first param can be used
+to block the process and wait until list elements are available. If the list
+is empty in both examples below, the first example will return <code>null</code>, while
+the second will wait for up to 3 seconds. If a list element becomes available
+during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
+
+<h2>Example</h2>
+
+<p>   <code>list.shift(callback);</code></p>
+
+<h2>Blocking Example</h2>
+
+<p>   <code>list.shift(3, callback)</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">shift</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">wait</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">blpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get and remove the last element in the list. The first param can be used
+to block the process and wait until list elements are available. If the list
+is empty in both examples below, the first example will return <code>null</code>, while
+the second will wait for up to 3 seconds. If a list element becomes available
+during the 3 seconds it will be returned, otherwise <code>null</code> will be returned.</p>
+
+<h2>Example</h2>
+
+<p>   <code>list.pop(callback);</code></p>
+
+<h2>Blocking Example</h2>
+
+<p>   <code>list.pop(3, callback)</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>int</em>  wait (optional) - seconds to block</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">pop</span> = <span class="keyword">function</span> (<span class="variable">wait</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">wait</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">brpop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Add one or more elements to the start of the list.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | array</em>  value(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">unshift</span> = <span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">lpush</span> = <span class="keyword">function</span> (<span class="variable">values</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">values</span>)) {
+        <span class="keyword">var</span> <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>(), <span class="variable">key</span> = <span class="this">this</span>.<span class="variable">key</span>;
+        <span class="variable">values</span>.<span class="variable">reverse</span>().<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">value</span>) {
+            <span class="variable">multi</span>.<span class="variable">lpush</span>(<span class="variable">key</span>, <span class="variable">value</span>);
+        });
+        <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">lpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">values</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Add one or more elements to the end of the list.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | array</em>  value(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">push</span> = <span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">values</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">values</span>)) {
+        <span class="keyword">var</span> <span class="variable">multi</span> = <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">multi</span>(), <span class="variable">key</span> = <span class="this">this</span>.<span class="variable">key</span>;
+        <span class="variable">values</span>.<span class="variable">forEach</span>(<span class="keyword">function</span> (<span class="variable">value</span>) {
+            <span class="variable">multi</span>.<span class="variable">rpush</span>(<span class="variable">key</span>, <span class="variable">value</span>);
+        });
+        <span class="variable">multi</span>.<span class="variable">exec</span>(<span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">values</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Remove the last element of the list and add it to the start
+of another list.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>String | List</em>  list</p></li><li><p><strong>param</strong>: <em>bool</em>  wait (optional) - seconds to block while waiting</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">List</span>.<span class="variable">prototype</span>.<span class="variable">popShift</span> = <span class="keyword">function</span> (<span class="variable">list</span>, <span class="variable">wait</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="variable">list</span> = <span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">list</span>);
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">wait</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">wait</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">rpoplpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">list</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">brpoplpush</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">list</span>, <span class="variable">wait</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}
+</code></pre>
+</td>
+</tr><tr class="filename"><td><h2 id="lib/base_structures/Hash.js"><a href="#">Hash</a></h2></td><td>lib/base_structures/Hash.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>A wrapper for the Redis hash type.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createHash(key);</code></p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/topics/data-types#hashes</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)key = hash(key =&gt; value)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Hash</span> = <span class="variable">exports</span>.<span class="class">Hash</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get an array of hash keys.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">keys</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hkeys</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get an array of hash values.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">values</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hvals</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the number of hash keys.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hlen</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Delete a hash key.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="keyword">delete</span> = <span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">del</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hdel</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Checks whether a hash key exists.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">exists</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hexists</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Sets one or more key/value pairs.</p>
+
+<p>To set one key/value pair:
+   <code>hash.set('foo', 'bar', callback);</code></p>
+
+<p>To set multiple:
+   <code>hash.set({key1:'value1', key2:'value2}, callback);</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Object</em>  hash_key</p></li><li><p><strong>param</strong>: <em>string</em>  value (optional)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">set</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">hash_key</span> === <span class="string">'object'</span>) {
+        <span class="variable">callback</span> = <span class="variable">value</span> || <span class="keyword">function</span> () {};
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hmset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hset</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Sets a key/value pair if the key doesn't already exist.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>string</em>  value</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hsetnx</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">value</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Gets one or more key/value pairs.</p>
+
+<p>To get all key/value pairs in the hash:
+   <code>hash.get('foo', callback);</code></p>
+
+<p>To get certain key/value pairs:
+   <code>hash.get(['foo','bar'], callback);</code>
+   <code>hash.get('foo', callback);</code></p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key (optional)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">get</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">hash_key</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">hash_key</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hgetall</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">hash_key</span>)) {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hmget</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>)
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hget</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Increment the specified hash value.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>int</em>  amount (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">increment</span> =
+<span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">incrBy</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">amount</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">amount</span>;
+        <span class="variable">amount</span> = <span class="number integer">1</span>;
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hincrby</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Decrement the specified hash value.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  hash_key</p></li><li><p><strong>param</strong>: <em>int</em>  amount (optional - default is 1)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">decrement</span> =
+<span class="class">Hash</span>.<span class="variable">prototype</span>.<span class="variable">decrBy</span> = <span class="keyword">function</span> (<span class="variable">hash_key</span>, <span class="variable">amount</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">amount</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">amount</span>;
+        <span class="variable">amount</span> = <span class="number integer">1</span>;
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">hincrby</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">hash_key</span>, -<span class="number integer">1</span> * <span class="variable">amount</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}
+</code></pre>
+</td>
+</tr><tr class="filename"><td><h2 id="lib/base_structures/Set.js"><a href="#">Set</a></h2></td><td>lib/base_structures/Set.js</td></tr><tr class="code">
+<td class="docs">
+<p>Module dependencies.
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Structure</span> = <span class="variable">require</span>(<span class="string">'../Structure'</span>);</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>A wrapper for the Redis set type.</p>
+
+<h2>Usage</h2>
+
+<p>   <code>redback.createSet(key);</code></p>
+
+<h2>Reference</h2>
+
+<p>   http://redis.io/topics/data-types#sets</p>
+
+<h2>Redis Structure</h2>
+
+<p>   <code>(namespace:)key = set(elements)</code>
+ </p>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">Set</span> = <span class="variable">exports</span>.<span class="class">Set</span> = <span class="class">Structure</span>.<span class="keyword">new</span>();</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Add one or more elements to the set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Array</em>  element(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">add</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">element</span>)) {
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">addAll</span>(<span class="variable">element</span>, <span class="variable">callback</span>);
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sadd</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Remove one or more elements from the set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Array</em>  element(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">remove</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="keyword">if</span> (<span class="class">Array</span>.<span class="variable">isArray</span>(<span class="variable">element</span>)) {
+        <span class="keyword">return</span> <span class="this">this</span>.<span class="variable">removeAll</span>(<span class="variable">element</span>, <span class="variable">callback</span>);
+    }
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">srem</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get an array of elements in the set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">elements</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">members</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">smembers</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Move an element to another set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string</em>  element</p></li><li><p><strong>param</strong>: <em>Function</em>  callback (optional)</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">move</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">element</span>, <span class="variable">callback</span>) {
+    <span class="variable">callback</span> = <span class="variable">callback</span> || <span class="keyword">function</span> () {};
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">smove</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="this">this</span>.<span class="variable">getKey</span>(<span class="variable">dest</span>), <span class="variable">element</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Check whether an element exists in the set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string</em>  element</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">exists</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">contains</span> = <span class="keyword">function</span> (<span class="variable">element</span>, <span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sismember</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">element</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the length (cardinality) of the set.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">length</span> = <span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">cardinality</span> = <span class="keyword">function</span> (<span class="variable">callback</span>) {
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">scard</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get a random element from the set and optionally remove it.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>bool</em>  remove (optional - default is false)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">random</span> = <span class="keyword">function</span> (<span class="variable">remove</span>, <span class="variable">callback</span>) {
+    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">remove</span> === <span class="string">'function'</span>) {
+        <span class="variable">callback</span> = <span class="variable">remove</span>;
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">srandmember</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    } <span class="keyword">else</span> {
+        <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">spop</span>(<span class="this">this</span>.<span class="variable">key</span>, <span class="variable">callback</span>);
+    }
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the intersection of one or more sets.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">inter</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sinter</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the intersection of one or more sets and store it another
+set (dest).</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">interStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sinterstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the union of one or more sets.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">union</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sunion</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the union of one or more sets and store it another
+set (dest).</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">unionStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sunionstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the difference of one or more sets.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">diff</span> = <span class="keyword">function</span> (<span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sdiff</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Get the difference of one or more sets and store it another
+set (dest).</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>string | Set</em>  dest</p></li><li><p><strong>param</strong>: <em>string | Set | Array</em>  set(s)</p></li><li><p><strong>param</strong>: <em>Function</em>  callback</p></li><li><p><strong>return</strong>: <em>this</em></p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="class">Set</span>.<span class="variable">prototype</span>.<span class="variable">diffStore</span> = <span class="keyword">function</span> (<span class="variable">dest</span>, <span class="variable">sets</span>, <span class="variable">callback</span>) {
+    <span class="variable">sets</span> = <span class="this">this</span>.<span class="variable">getKeys</span>(<span class="variable">arguments</span>);
+    <span class="variable">dest</span> = <span class="variable">sets</span>.<span class="variable">shift</span>();
+    <span class="variable">sets</span>.<span class="variable">unshift</span>(<span class="variable">dest</span>, <span class="this">this</span>.<span class="variable">key</span>);
+    <span class="this">this</span>.<span class="variable">client</span>.<span class="variable">sdiffstore</span>.<span class="variable">apply</span>(<span class="this">this</span>.<span class="variable">client</span>, <span class="variable">sets</span>);
+    <span class="keyword">return</span> <span class="this">this</span>;
+}</code></pre>
 </td>
 </tr>	</body>
 </html></tbody></table>
