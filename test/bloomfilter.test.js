@@ -36,21 +36,25 @@ module.exports = {
     });
   },
   
-  'test bloom filter#delete': function () {
+  'test bloom filter#reset': function () {
     var bloomfilter = redback.createBloomFilter('test_addstructure_bloom_filter_bar', 101, 3);
+    
     bloomfilter.add('bar', function(err){
-      bloomfilter.exists('bar', function(err, value){
-        assert.equal(true, value);
-        bloomfilter.delete('bar', function(err){
-          bloomfilter.exists('bar', function(err, val){
-            assert.equal(false, val);
+      bloomfilter.add('baz', function(err){
+        bloomfilter.exists('bar', function(err, value){
+          assert.equal(true, value);
+          bloomfilter.reset(function(err){
+            bloomfilter.exists('bar', function(err, val){
+              assert.equal(false, val);
+            });
+
+            bloomfilter.exists('baz', function(err, val){
+              assert.equal(false, val);
+            });
           });
         });
+        
       });
-      // bloomfilter.exists("this probably does not exist", function(err, value){
-      //   assert.equal(false, value);
-      // });
-      
     });
   }
   
