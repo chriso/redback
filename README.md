@@ -20,6 +20,7 @@ It also comes with the following advanced data structures:
 - **FullText** - A full text index with support for stop words, stemming and basic boolean search
 - **Queue** - A simple FIFO or LIFO queue
 - **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting. See [this blog post](http://chris6f.com/rate-limiting-with-redis)
+- **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set. Contributed by user [sreeix](https://github.com/sreeix)
 
 *Have an idea for an advanced structure? Send a pull request and I'll add you as a contributor.*
 
