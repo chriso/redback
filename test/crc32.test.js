@@ -1,4 +1,4 @@
-var crc32 = require('Crc32').crc32,
+var crc32 = require('Utils').crc32,
     assert = require('assert');
 
 module.exports = {
