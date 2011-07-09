@@ -514,15 +514,19 @@ for structures.</p>
 
 <h2></h2>
 
+<ul><li><p><strong>param</strong>: <em>RedisClient</em>  client</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li></ul>
+
+<p>or</p>
+
 <ul><li><p><strong>param</strong>: <em>string</em>  host (optional)</p></li><li><p><strong>param</strong>: <em>int</em>  port (optional)</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
 </td>
 <td class="code">
-<pre><code><span class="keyword">var</span> <span class="class">Redback</span> = <span class="variable">exports</span>.<span class="class">Redback</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
-    <span class="this">this</span>.<span class="variable">client</span> = <span class="variable">redis</span>.<span class="variable">createClient</span>.<span class="variable">apply</span>(<span class="this">this</span>, <span class="variable">arguments</span>);
-    <span class="this">this</span>.<span class="variable">namespace</span> = <span class="string">''</span>;
-    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="variable">options</span> === <span class="string">'object'</span>) {
-        <span class="this">this</span>.<span class="variable">namespace</span> = <span class="variable">options</span>.<span class="variable">namespace</span> || <span class="string">''</span>;
-    }
+<pre><code><span class="keyword">var</span> <span class="class">Redback</span> = <span class="variable">exports</span>.<span class="class">Redback</span> = <span class="keyword">function</span> () {
+    <span class="this">this</span>.<span class="variable">client</span> = <span class="variable">arguments</span>[<span class="number integer">0</span>] <span class="variable">instanceof</span> <span class="variable">redis</span>.<span class="class">RedisClient</span> ?
+        <span class="variable">arguments</span>[<span class="number integer">0</span>] : <span class="variable">redis</span>.<span class="variable">createClient</span>.<span class="variable">apply</span>(<span class="this">this</span>, <span class="variable">arguments</span>);
+    <span class="keyword">var</span> <span class="variable">options</span> = <span class="variable">arguments</span>[<span class="number integer">1</span>] <span class="variable">instanceof</span> <span class="class">Object</span> ?
+        <span class="variable">arguments</span>[<span class="number integer">1</span>] : <span class="variable">arguments</span>[<span class="number integer">2</span>];
+    <span class="this">this</span>.<span class="variable">namespace</span> = <span class="variable">options</span>.<span class="variable">namespace</span> || <span class="string">''</span>;
 }</code></pre>
 </td>
 </tr>
@@ -608,6 +612,20 @@ for structures.</p>
 <td class="code">
 <pre><code><span class="variable">exports</span>.<span class="variable">createClient</span> = <span class="keyword">function</span> (<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>) {
     <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Redback</span>(<span class="variable">host</span>, <span class="variable">port</span>, <span class="variable">options</span>);
+}</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Wrap a Redis client with Redback.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>RedisClient</em>  client</p></li><li><p><strong>param</strong>: <em>Object</em>  options (optional)</p></li><li><p><strong>api</strong>: <em>public</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">exports</span>.<span class="variable">use</span> = <span class="keyword">function</span> (<span class="variable">client</span>, <span class="variable">options</span>) {
+    <span class="keyword">return</span> <span class="keyword">new</span> <span class="class">Redback</span>(<span class="variable">client</span>, <span class="variable">options</span>);
 }</code></pre>
 </td>
 </tr>

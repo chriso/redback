@@ -28,7 +28,11 @@ It also comes with the following advanced data structures:
 
 ```javascript
 var redback = require('redback').createClient();
-
+```
+or
+```javascript
+var redis = require('redis').createClient();
+var redback = new request('redback').use(redis);
 var user3 = redback.createSocialGraph(3);
 user3.follow(1, callback);
 
