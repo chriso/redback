@@ -1,12 +1,12 @@
 { "name"          : "redback",
   "description"   : "A high-level Redis library",
-  "version"       : "0.2.7",
+  "version"       : "0.2.8",
   "homepage"      : "https://github.com/chriso/redback",
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
   "bugs": {
     "mail": "cohara87@gmail.com",
-    "web": "http://github.com/chriso/redback/issues"
+    "url": "http://github.com/chriso/redback/issues"
   },
   "repository": {
     "type": "git",
