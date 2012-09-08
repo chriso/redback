@@ -45,6 +45,13 @@ module.exports = {
                     assert.equal('bar', value);
                 });
 
+                keypair.getById([1, 2], function (err, values) {
+                    assert(Array.isArray(values));
+                    assert.equal(values.length, 2);
+                    assert.equal('foo', values.shift());
+                    assert.equal('bar', values.shift());
+                });
+
                 keypair.get('nothere', function (err, id) {
                     assert.equal(null, id);
                 });
