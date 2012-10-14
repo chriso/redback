@@ -1,6 +1,6 @@
 { "name"          : "redback",
   "description"   : "A high-level Redis library",
-  "version"       : "0.3.0",
+  "version"       : "0.3.1",
   "homepage"      : "https://github.com/chriso/redback",
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
@@ -17,8 +17,7 @@
   },
   "engines": { "node": ">= 0.4.0" },
   "dependencies": {
-    "hiredis": ">= 0.1.9",
-    "redis": ">= 0.6.0"
+    "redis": ">= 0.8.1"
   },
   "devDependencies": {
     "expresso": "*",
