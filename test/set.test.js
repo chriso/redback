@@ -20,6 +20,9 @@ module.exports = {
 
                 set.elements(function (err, values) {
                     assert.equal(2, values.length);
+                    values = values.sort(function (a, b) {
+                        return a > b ? -1 : 1;
+                    });
                     assert.equal('foo', values.shift());
                     assert.equal('bar', values.shift());
                 });
