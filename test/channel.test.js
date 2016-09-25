@@ -1,11 +1,11 @@
-var redback = require('../').createClient(),
-    client2 = require('redis').createClient(),
+var redback = require('./common').createClient(),
+    client2 = require('./common').createClient(),
     assert = require('assert');
 
 //Close the Redis connection after 500ms
 setTimeout(function () {
     redback.client.quit();
-    client2.quit();
+    client2.client.quit();
 }, 500);
 
 module.exports = {
@@ -23,7 +23,7 @@ module.exports = {
 
         channel.subscribe(function () {
             //Bind another client so it doesn't affect the other tests
-            channel.setClient(client2);
+            channel.setClient(client2.client);
             channel.publish('foo', function (err) {
                 assert.ok(true);
             });

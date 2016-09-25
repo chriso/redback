@@ -1,4 +1,4 @@
-var redback = require('../').createClient(),
+var redback = require('./common').createClient(),
     assert = require('assert');
 
 //Flush the DB and close the Redis connection after 500ms

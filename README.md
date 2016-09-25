@@ -116,7 +116,7 @@ See the [annotated source](http://chriso.github.io/redback/api.html) (currently 
 ## Tests
 
 The tests require a local redis instance running on `localhost:6379`. Note that
-the redis database will be flushed prior to each test invocation.
+redis database #11 will be flushed prior to each run.
 
 ```sh
 $ npm test

@@ -1,13 +1,11 @@
-var redback = require('../').createClient(),
+var redback = require('./common').createClient(),
     assert = require('assert');
 
 // Flush the DB and close the Redis connection after 2 seconds
 setTimeout(function () {
     // Ensure we completed all tests
     assert.strictEqual(_testsCompleted, Object.keys(module.exports).length);
-    redback.client.flushdb(function (err) {
-        redback.client.quit();
-    });
+    redback.client.quit();
 }, 2000);
 
 var TEST_LOCK = 'test lock';

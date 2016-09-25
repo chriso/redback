@@ -4,7 +4,7 @@ var redback = require('../'),
     Hash = redback.Hash,
     List = redback.List;
 
-redback = redback.createClient();
+redback = require('./common').createClient(),
 
 //Flush the DB and close the Redis connection after 500ms
 setTimeout(function () {
