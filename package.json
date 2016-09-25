@@ -5,17 +5,15 @@
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
   "scripts": {
-    "test": "make test"
+    "test": "expresso -s"
   },
   "bugs": {
-    "mail": "cohara87@gmail.com",
     "url": "http://github.com/chriso/redback/issues"
   },
   "repository": {
     "type": "git",
     "url": "http://github.com/chriso/redback.git"
   },
-  "engines": { "node": ">= 0.4.0" },
   "dependencies": {
     "redis": "*"
   },
@@ -25,8 +23,5 @@
   "contributors": [
     { "name": "Sreekanth", "github": "https://github.com/sreeix", "email": "sreeix@gmail.com" }
   ],
-  "licenses": [{
-    "type": "MIT",
-    "url": "http://github.com/chriso/redback/raw/master/LICENSE"
-  }]
+  "license": "MIT"
 }
