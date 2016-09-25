@@ -1,8 +1,14 @@
-**redback** - A high-level Redis library for Node.JS.
+# Redback
 
-    npm install -g redback
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url]
 
-## What is it?
+A high-level Redis library.
+
+```sh
+$ npm install redback
+```
+
+## Introduction
 
 Redback provides an accessible and extensible interface to the Redis
 [data types](http://redis.io/topics/data-types) and allows you to create
@@ -18,7 +24,7 @@ It also comes with the following advanced data structures:
 - **FullText** - A full text index with support for stop words, stemming and basic boolean search
 - **Queue** - A simple FIFO or LIFO queue
 - **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting. See [this blog post](https://gist.github.com/chriso/54dd46b03155fcf555adccea822193da)
-- **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set. Contributed by user [sreeix](https://github.com/sreeix)
+- **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set
 
 ## Usage
 
@@ -105,10 +111,20 @@ channel.on('message', function (msg) {
 channel.publish(msg);
 ```
 
+## Documentation
+
+See the [annotated source](http://chriso.github.io/redback/api.html).
+
 ## Credits
 
 - Matt Ranney for his [node_redis](https://github.com/mranney/node_redis) library.
+- GitHub user [sreeix](https://github.com/sreeix) for the bloom filter implementation.
 
 ## License
 
 MIT
+
+
+[downloads-image]: http://img.shields.io/npm/dm/redback.svg
+[npm-url]: https://npmjs.org/package/redback
+[npm-image]: http://img.shields.io/npm/v/redback.svg
