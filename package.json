@@ -5,7 +5,8 @@
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
   "scripts": {
-    "test": "redis-cli -n 11 flushdb && expresso -s test/*.test.js"
+    "test": "redis-cli -n 11 flushdb && expresso -s test/*.test.js",
+    "gen-docs": "dox -t Redback -d 'A high-level Redis library' -r https://github.com/chriso/redback lib/**/*.js > docs/api.html"
   },
   "bugs": {
     "url": "http://github.com/chriso/redback/issues"
@@ -18,7 +19,8 @@
     "redis": "*"
   },
   "devDependencies": {
-    "expresso": "*"
+    "expresso": "*",
+    "dox": "0.0.5"
   },
   "contributors": [
     { "name": "Sreekanth", "github": "https://github.com/sreeix", "email": "sreeix@gmail.com" }

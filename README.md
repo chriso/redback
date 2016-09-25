@@ -111,7 +111,7 @@ channel.publish(msg);
 
 ## Documentation
 
-See the [annotated source](http://chriso.github.io/redback/api.html) (currently out of date).
+See the [annotated source](http://chriso.github.io/redback/api.html).
 
 ## Tests
 
