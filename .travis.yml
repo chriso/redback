@@ -1,0 +1,12 @@
+sudo: false
+
+language: node_js
+
+node_js:
+  - stable
+
+services:
+  - redis-server
+
+after_script:
+  - npm test
