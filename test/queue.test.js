@@ -10,8 +10,8 @@ setTimeout(function () {
 
 module.exports = {
 
-    'test social graph': function () {
-        var lifo = redback.createQueue('test_addstructure_lifo_queue');
+    'test lifo queue': function () {
+        var lifo = redback.createQueue('test_lifo_queue');
 
         lifo.add('foo', function (err) {
             lifo.add('bar', function (err) {
@@ -26,8 +26,10 @@ module.exports = {
                 });
             });
         });
+    },
 
-        var fifo = redback.createQueue('test_queue_fifo', true);
+    'test fifo queue': function () {
+        var fifo = redback.createQueue('test_fifo_queue', true);
 
         fifo.enqueue('foo', function (err) {
             fifo.enqueue('bar', function (err) {
@@ -42,6 +44,6 @@ module.exports = {
                 });
             });
         });
-    },
+    }
 
 }
