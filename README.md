@@ -22,7 +22,7 @@ It also comes with the following advanced data structures:
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
 - **Queue** - A simple FIFO or LIFO queue
-- **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting. See [this blog post](https://gist.github.com/chriso/54dd46b03155fcf555adccea822193da)
+- **RateLimit** - Count the number of times an event occurs over an interval. See [this introduction](https://gist.github.com/chriso/54dd46b03155fcf555adccea822193da).
 - **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set
 
 ## Usage
