@@ -1,6 +1,8 @@
 # Redback
 
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url]
+[![NPM version][npm-image]][npm-url]
+[![Build Status][travis-image]][travis-url]
+[![Downloads][downloads-image]][npm-url]
 
 A high-level Redis library.
 
@@ -133,3 +135,5 @@ MIT
 [downloads-image]: http://img.shields.io/npm/dm/redback.svg
 [npm-url]: https://npmjs.org/package/redback
 [npm-image]: http://img.shields.io/npm/v/redback.svg
+[travis-url]: https://travis-ci.org/chriso/redback
+[travis-image]: http://img.shields.io/travis/chriso/redback.svg
