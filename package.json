@@ -20,8 +20,7 @@
     "redis": "*"
   },
   "devDependencies": {
-    "expresso": "*",
-    "stem": "*"
+    "expresso": "*"
   },
   "contributors": [
     { "name": "Sreekanth", "github": "https://github.com/sreeix", "email": "sreeix@gmail.com" }

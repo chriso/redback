@@ -21,7 +21,6 @@ It also comes with the following advanced data structures:
 - **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
-- **FullText** - A full text index with support for stop words, stemming and basic boolean search
 - **Queue** - A simple FIFO or LIFO queue
 - **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting. See [this blog post](https://gist.github.com/chriso/54dd46b03155fcf555adccea822193da)
 - **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set
@@ -41,15 +40,11 @@ var redback = require('redback').use(redis);
 var user3 = redback.createSocialGraph(3);
 user3.follow(1, callback);
 
-var text = redback.createFullText('my_index');
-text.indexFile({1: 'file1.txt', 2: 'file2.txt'}, callback);
-text.search('foo bar -exclude -these -words', callback);
-
-var user1 = redback.createHash('user1');
-user.set({username:'chris', password:'redisisawesome'}, callback);
-
 var log = redback.createCappedList('log', 1000);
 log.push('Log message ...');
+
+var user = redback.createHash('user1');
+user.set({username: 'chris', password: 'foobar'}, callback);
 ```
 
 ## Creating your own structures
@@ -60,8 +55,9 @@ Let's create a queue that can be either FIFO or LIFO:
 
 ```javascript
 redback.addStructure('SimpleQueue', {
-    init: function (is_fifo) {
-        this.fifo = is_fifo;
+    init: function (options) {
+        options = options || {};
+        this.fifo = options.fifo;
     },
     add: function (value, callback) {
         this.client.lpush(this.key, value, callback);
@@ -73,10 +69,10 @@ redback.addStructure('SimpleQueue', {
 });
 ```
 
-Call `createSimpleQueue(key, is_fifo)` to use the queue:
+Call `createSimpleQueue(key, options)` to use the queue:
 
 ```javascript
-var queue = redback.createSimpleQueue('my_queue', true);
+var queue = redback.createSimpleQueue('my_queue', {fifo: true});
 queue.add('awesome!');
 ```
 
