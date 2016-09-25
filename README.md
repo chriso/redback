@@ -5,13 +5,13 @@
 ## What is it?
 
 Redback provides an accessible and extensible interface to the Redis
-[data types](http://redis.io/topics/data-types) and allows you to roll
+[data types](http://redis.io/topics/data-types) and allows you to create
 your own structures with ease. Redback comes with the following built-in
 structures: **List**,  **Set**, **SortedSet**, **Hash**, **Channel**, **Cache**
 
 It also comes with the following advanced data structures:
 
-- **DensitySet** - A sorted set where adding an element increments its score and removing it decrements it.
+- **DensitySet** - A sorted set where adding an element increments its score and removing it decrements it
 - **KeyPair** - Uses two hash structures and an auto-incrementing key to assign an ID to each unique value
 - **SocialGraph** - Similar to Twitter's (following vs. followers)
 - **CappedList** - A list with a fixed length
@@ -19,8 +19,6 @@ It also comes with the following advanced data structures:
 - **Queue** - A simple FIFO or LIFO queue
 - **RateLimit** - Count the number of times an event occurs over an interval. Can be used for IP rate limiting. See [this blog post](https://gist.github.com/chriso/54dd46b03155fcf555adccea822193da)
 - **BloomFilter** - A probabilistic structure used to test whether an an element exists in a set. Contributed by user [sreeix](https://github.com/sreeix)
-
-*Have an idea for an advanced structure? Send a pull request and I'll add you as a contributor.*
 
 ## Usage
 
@@ -50,9 +48,9 @@ log.push('Log message ...');
 
 ## Creating your own structures
 
-To create your own structure, use `addStructure(name, methods)`.
+Use `addStructure(name, methods)` to create your own structure.
 
-Let's create a queue that can be either FIFO or LIFO
+Let's create a queue that can be either FIFO or LIFO:
 
 ```javascript
 redback.addStructure('SimpleQueue', {
@@ -69,7 +67,7 @@ redback.addStructure('SimpleQueue', {
 });
 ```
 
-To use the queue, call `createSimpleQueue(key, is_fifo)`
+Call `createSimpleQueue(key, is_fifo)` to use the queue:
 
 ```javascript
 var queue = redback.createSimpleQueue('my_queue', true);
@@ -109,29 +107,8 @@ channel.publish(msg);
 
 ## Credits
 
-- Matt Ranney for his awesome [node_redis](https://github.com/mranney/node_redis) library.
+- Matt Ranney for his [node_redis](https://github.com/mranney/node_redis) library.
 
 ## License
 
-(MIT License)
-
-Copyright (c) 2010 Chris O'Hara <cohara87@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT
