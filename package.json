@@ -5,7 +5,7 @@
   "author"        : "Chris O'Hara <cohara87@gmail.com>",
   "main"          : "index",
   "scripts": {
-    "test": "expresso -s"
+    "test": "redis-cli flushdb && expresso -s"
   },
   "bugs": {
     "url": "http://github.com/chriso/redback/issues"
