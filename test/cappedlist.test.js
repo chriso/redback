@@ -110,9 +110,9 @@ module.exports = {
                     list.unshift('z', function (err) {
                         list.values(function (err, values) {
                             assert.equal(3, values.length);
+                            assert.equal('z', values.shift());
                             assert.equal('c', values.shift());
                             assert.equal('a', values.shift());
-                            assert.equal('b', values.shift());
                         });
                     });
                 });
